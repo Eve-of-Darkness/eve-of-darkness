@@ -5,6 +5,7 @@ defmodule EOD.Mixfile do
     [app: :eve_of_darkness,
      version: "0.1.0",
      elixir: "~> 1.5",
+     elixirc_paths: elixir_paths(Mix.env),
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      deps: deps()]
@@ -17,6 +18,9 @@ defmodule EOD.Mixfile do
     [applications: [:logger],
      mod: {EOD, []}]
   end
+
+  defp elixir_paths(:test), do: ~w(lib test/support)
+  defp elixir_paths(_),     do: ~w(lib)
 
   # Dependencies can be Hex packages:
   #
