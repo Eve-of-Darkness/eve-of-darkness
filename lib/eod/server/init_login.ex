@@ -13,7 +13,7 @@ defmodule EOD.Server.InitLogin do
     GenServer.start_link(__MODULE__, %__MODULE__{})
   end
 
-  def handle_socket(pid, socket=%Socket{}) do
+  def handle_socket(pid, socket) do
     GenServer.cast(pid, {:handle_socket, socket})
   end
 
@@ -32,16 +32,20 @@ defmodule EOD.Server.InitLogin do
 
   defp login(socket, _state) do
     case Socket.recv(socket) do
-      # This happens quite a bit from `zero` pings from the portal
-      # checking to see if the server is available
+      {:ok, %{id: :handshake_request}=data} ->
+        Logger.debug "Handshake Init, Client: #{inspect(data)}"
+        socket |> Socket.send(%{ data | id: :handshake_response})
+        login(socket, Map.drop(data, [:id]))
+
+      {:ok, %{id: :login_request}=data} ->
+        Logger.debug "Login Request: #{inspect data}"
+
       {:error, :closed} ->
         Logger.debug "Connection closed sending nothing"
 
-      {:ok, packet} ->
-        Logger.debug """
-        Login Attempt:
-        #{inspect packet}
-        """
+      {:error, error} ->
+        Logger.error "Login Failure: #{error}"
+        Socket.close(socket)
     end
   end
 end

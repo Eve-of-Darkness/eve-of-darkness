@@ -34,7 +34,7 @@ defmodule EOD.Server.ConnManager do
     with {:ok, port} <- opts |> Keyword.get(:port, 10300) |> parse_port,
          {:ok, clbk} <- opts |> Keyword.get(:callback, def_clbk()) |> check_callback,
          {:ok, wrap} <- opts |> Keyword.get(:wrap, :none) |> check_wrap,
-         {:ok, sock} <- :gen_tcp.listen(port, [:binary, active: false])
+         {:ok, sock} <- :gen_tcp.listen(port, [:binary, active: false, reuseaddr: true])
     do
       GenServer.start_link(
         __MODULE__,

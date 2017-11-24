@@ -22,8 +22,9 @@ defmodule EOD.Server do
   # GenServer Callbacks
 
   def init(state=%__MODULE__{}) do
-    with {:ok, manager} <- ConnManager.start_link(conn_manager_opts(state)),
-           {:ok, login} <- InitLogin.start_link()
+    with \
+      {:ok, manager} <- ConnManager.start_link(conn_manager_opts(state)),
+      {:ok, login} <- InitLogin.start_link()
     do
       {:ok, %{state | conn_manager: manager, init_login: login}}
     end
@@ -38,6 +39,6 @@ defmodule EOD.Server do
   defp conn_manager_opts(%{ref: ref}) do
     [port: 10300,
      callback: {:send, {:new_conn, ref}, self()},
-     wrap: {Socket, :new, [[]]}]
+     wrap: {Socket.TCP.GameSocket, :new, []}]
   end
 end
