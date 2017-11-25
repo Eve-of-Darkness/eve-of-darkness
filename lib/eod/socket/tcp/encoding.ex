@@ -28,7 +28,9 @@ defmodule EOD.Socket.TCP.Encoding do
   end
 
   @encoders %{
-    handshake_response: { 0x22, Encoding.HandshakeResponse }
+    handshake_response: { 0x22, Encoding.HandshakeResponse },
+    login_granted: { 0x2A, Encoding.LoginGranted },
+    login_denied: { 0x2C, Encoding.LoginDenied }
   }
 
   @doc """
