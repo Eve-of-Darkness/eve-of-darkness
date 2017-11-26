@@ -10,7 +10,7 @@ defmodule EOD.Socket.TCP.ServerPacket do
 
   @doc """
   Given an 8bit integer as the code ID for the server packet, this creates
-  a packet you can work with which can then be understood by the 
+  a packet you can work with which can then be understood by the
   `EOD.Socket.TCP.GameSocket`
   """
   def new(code), do: %__MODULE__{code: code}
@@ -50,6 +50,15 @@ defmodule EOD.Socket.TCP.ServerPacket do
   def write_16(packet, <<_::16>>=data), do: append_data(packet, data)
   def write_16(packet, int) when is_integer(int) and int in 0..65_535,
     do: append_data(packet, <<int::16>>)
+
+  @doc """
+  Writes a pascal style string using a single byte size header to the buffer
+  """
+  def write_pascal_string(packet, string) when is_binary(string) do
+    packet
+    |> write_byte(byte_size(string))
+    |> write_string(string)
+  end
 
   defp append_data(packet=%{data: data}, payload) do
     %{ packet | data: [ data, payload ] }
