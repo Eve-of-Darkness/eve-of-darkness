@@ -6,12 +6,12 @@ defmodule EOD.Server do
   """
   use GenServer
   alias EOD.Server.ConnManager
+  alias EOD.Client
   alias EOD.Socket
-  alias EOD.Server.InitLogin
   require Logger
 
   defstruct conn_manager: nil,
-            init_login: nil,
+            client_manager: nil,
             ref: nil
 
   def start_link(opts \\ []) do
@@ -24,15 +24,15 @@ defmodule EOD.Server do
   def init(state=%__MODULE__{}) do
     with \
       {:ok, manager} <- ConnManager.start_link(conn_manager_opts(state)),
-      {:ok, login} <- InitLogin.start_link()
+      {:ok, client_manager} <- Client.Manager.start_link()
     do
-      {:ok, %{state | conn_manager: manager, init_login: login}}
+      {:ok, %{state | conn_manager: manager, client_manager: client_manager}}
     end
   end
 
   # Called when a new client connects from the conn_manager
   def handle_info({{:new_conn, ref}, socket}, %{ref: ref}=state) do
-    InitLogin.handle_socket(state.init_login, socket)
+    Client.Manager.start_client(state.client_manager, socket)
     {:noreply, state}
   end
 
