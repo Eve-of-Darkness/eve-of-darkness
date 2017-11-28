@@ -1,5 +1,6 @@
 defmodule EOD.Repo.Account do
   use Ecto.Schema
+  import Ecto.Query, only: [from: 2]
 
   @primary_key {:id, :binary_id, autogenerate: true}
 
@@ -27,6 +28,13 @@ defmodule EOD.Repo.Account do
   when is_binary(hash) and is_binary(password),
     do: Comeonin.Pbkdf2.checkpw(password, hash)
   def correct_password?(_, _), do: Comeonin.Pbkdf2.dummy_checkpw
+
+  def find_by_username(query \\ __MODULE__, name) when is_binary(name) do
+    from(
+      a in query,
+      where: fragment("lower(?)", a.username) == ^String.downcase(name)
+    )
+  end
 
   defp hash_password(%Ecto.Changeset{changes: %{password: password}}=changeset) do
     import Ecto.Changeset
