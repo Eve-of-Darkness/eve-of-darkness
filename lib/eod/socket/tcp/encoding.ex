@@ -9,7 +9,10 @@ defmodule EOD.Socket.TCP.Encoding do
 
   @decoders %{
     handshake_request: { 0xF4, Encoding.HandshakeRequest },
-    login_request: { 0xA7, Encoding.LoginRequest }
+    login_request: { 0xA7, Encoding.LoginRequest },
+    ping_request: { 0xA3, Encoding.PingRequest },
+    char_select_request: { 0x10, Encoding.CharacterSelectRequest },
+    char_overview_request: { 0xFC, Encoding.CharacterOverviewRequest }
   }
 
   @doc """
@@ -30,7 +33,11 @@ defmodule EOD.Socket.TCP.Encoding do
   @encoders %{
     handshake_response: { 0x22, Encoding.HandshakeResponse },
     login_granted: { 0x2A, Encoding.LoginGranted },
-    login_denied: { 0x2C, Encoding.LoginDenied }
+    login_denied: { 0x2C, Encoding.LoginDenied },
+    ping_reply: { 0x29, Encoding.PingReply },
+    session_id: { 0x28, Encoding.SessionId },
+    char_overview: { 0xFD, Encoding.CharacterOverview },
+    realm: { 0xFE, Encoding.Realm }
   }
 
   @doc """
