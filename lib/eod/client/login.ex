@@ -14,9 +14,17 @@ defmodule EOD.Client.Login do
   def handle_packet(client=%Client{state: :handshake}, packet=%{id: :login_request}) do
     case find_or_create_account(packet) do
       {:ok, account} ->
-        granted_msg = Map.merge(client.version, %{id: :login_granted, username: packet.username})
-        :ok = client.tcp_socket |> Socket.send(granted_msg)
-        %{ client | account: account, state: :logged_in }
+        with {:ok, session_id} <- Client.SessionManager.register(client.sessions) do
+          granted_msg = Map.merge(client.version, %{id: :login_granted, username: packet.username})
+          :ok = client.tcp_socket |> Socket.send(granted_msg)
+          %{ client | account: account, state: :logged_in, session_id: session_id }
+        else
+          {:error, :no_session} ->
+            invalid_msg = Map.merge(client.version, %{id: :login_denied, reason: :too_many_players_logged_in})
+            :ok = client.tcp_socket |> Socket.send(invalid_msg)
+            :ok = client.tcp_socket |> Socket.close
+            %{ client | state: :bad_login }
+        end
 
       {:error, error} ->
         invalid_msg = Map.merge(client.version, %{id: :login_denied, reason: error})

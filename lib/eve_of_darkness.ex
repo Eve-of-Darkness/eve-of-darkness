@@ -9,10 +9,12 @@ defmodule EOD do
     # Define workers and child supervisors to be supervised
     children =
       if Mix.env == :test do
-        [supervisor(EOD.Repo, [])]
+        [supervisor(EOD.Repo, []),
+         {Registry, keys: :unique, name: EOD.Client.Registry}]
       else
         [supervisor(EOD.Repo, []),
-         worker(EOD.Server, [])]
+         worker(EOD.Server, []),
+         {Registry, keys: :unique, name: EOD.Client.Registry}]
       end
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

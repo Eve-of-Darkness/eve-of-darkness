@@ -3,10 +3,12 @@ defmodule EOD.ClientTest do
 
   alias EOD.{Client, Socket, TestSocket, Repo}
   alias Repo.Account
+  alias Client.SessionManager
 
-  setup _ do
+  setup tags do
     {:ok, socket} = TestSocket.start_link
-    {:ok, client} = Client.start_link(%Client{tcp_socket: socket})
+    {:ok, sessions} = SessionManager.start_link(id_pool: tags[:id_pool] || [1, 2, 3])
+    {:ok, client} = Client.start_link(%Client{tcp_socket: socket, sessions: sessions})
     Client.share_test_transaction(client)
     {:ok,
       client: client,
@@ -41,6 +43,20 @@ defmodule EOD.ClientTest do
         Socket.recv(context.socket)
 
       assert Account.find_by_username("test") |> Repo.one
+    end
+
+    @tag id_pool: []
+    test "login process where the server is full", context do
+      login_request = %{
+        id: :login_request,
+        username: "test", password: "roflcopters"
+      }
+
+      :ok = Socket.send(context.socket,  login_request)
+
+      assert {:ok, %{id: :login_denied, reason: :too_many_players_logged_in,
+                     major: 1, minor: 1, patch: 24}} == Socket.recv(context.socket)
+
     end
 
     test "login process where account exists and password is correct", context do

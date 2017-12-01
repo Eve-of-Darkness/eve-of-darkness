@@ -6,7 +6,8 @@ defmodule EOD.Client.Manager do
   use GenServer
   alias EOD.Client
 
-  defstruct client_super: nil
+  defstruct clients: nil,
+            sessions: nil
 
   def start_link do
     GenServer.start_link(__MODULE__, nil)
@@ -19,17 +20,19 @@ defmodule EOD.Client.Manager do
   # GenServer Callbacks
 
   def init(_) do
-    with {:ok, supervisor} <- client_supervisor()
+    with \
+      {:ok, clients} <- client_supervisor(),
+      {:ok, sessions} <- Client.SessionManager.start_link
     do
-      {:ok, %__MODULE__{client_super: supervisor}}
+      {:ok, %__MODULE__{clients: clients, sessions: sessions}}
     end
   end
 
   def handle_cast({:start_client, socket}, state) do
     {:ok, _client} =
       Supervisor.start_child(
-        state.client_super,
-        [%Client{tcp_socket: socket}]
+        state.clients,
+        [%Client{tcp_socket: socket, sessions: state.sessions}]
       )
     {:noreply, state}
   end

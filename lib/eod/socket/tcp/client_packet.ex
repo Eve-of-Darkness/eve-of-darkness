@@ -31,4 +31,26 @@ defmodule EOD.Socket.TCP.ClientPacket do
       id: id, size: size, session_id: sess, parameter: param, sequence: seq, data: data, check: check}}
   end
   def from_binary(bin) when is_binary(bin), do: {:error, :invalid_tcp_client_packet}
+
+  @doc """
+  Reads a null terminated string up to the maximum length
+  """
+  def read_string(%{data: data}, len), do: read_string(data, 0, len)
+  def read_string(data, len), do: read_string(data, 0, len)
+
+  @doc """
+  Reads a null terminated string starting at a certain position up to
+  a maximum length
+  """
+  def read_string(%{data: data}, start, len) do
+    read_string(data, start, len)
+  end
+  def read_string(data, start, len) do
+    <<_::bytes-size(start), str::bytes-size(len), _::binary>> = data
+    do_read_str(str, <<>>)
+  end
+
+  defp do_read_str(<<>>, str), do: str
+  defp do_read_str(<<0x00::8, _::binary>>, str), do: str
+  defp do_read_str(<<char::8, rem::binary>>, str), do: do_read_str(rem, str <> <<char>>)
 end
