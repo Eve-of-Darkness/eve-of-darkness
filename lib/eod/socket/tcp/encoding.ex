@@ -12,7 +12,8 @@ defmodule EOD.Socket.TCP.Encoding do
     login_request: { 0xA7, Encoding.LoginRequest },
     ping_request: { 0xA3, Encoding.PingRequest },
     char_select_request: { 0x10, Encoding.CharacterSelectRequest },
-    char_overview_request: { 0xFC, Encoding.CharacterOverviewRequest }
+    char_overview_request: { 0xFC, Encoding.CharacterOverviewRequest },
+    character_name_check: { 0xCB, Encoding.CharacterNameCheck }
   }
 
   @doc """
@@ -37,7 +38,8 @@ defmodule EOD.Socket.TCP.Encoding do
     ping_reply: { 0x29, Encoding.PingReply },
     session_id: { 0x28, Encoding.SessionId },
     char_overview: { 0xFD, Encoding.CharacterOverview },
-    realm: { 0xFE, Encoding.Realm }
+    realm: { 0xFE, Encoding.Realm },
+    character_name_check_reply: { 0xCC, Encoding.CharacterNameCheckReply }
   }
 
   @doc """

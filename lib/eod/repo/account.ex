@@ -1,18 +1,14 @@
 defmodule EOD.Repo.Account do
-  use Ecto.Schema
-  import Ecto.Query, only: [from: 2]
-
-  @primary_key {:id, :binary_id, autogenerate: true}
+  use EOD.Repo.Schema
 
   schema "accounts" do
     field :username, :string
     field :password, :string
+    has_many :characters, EOD.Repo.Character
     timestamps()
   end
 
   def changeset(%__MODULE__{}=struct, params \\ %{}) do
-    import Ecto.Changeset
-
     struct
     |> cast(params, [:username, :password])
     |> validate_required([:username, :password])
@@ -37,7 +33,6 @@ defmodule EOD.Repo.Account do
   end
 
   defp hash_password(%Ecto.Changeset{changes: %{password: password}}=changeset) do
-    import Ecto.Changeset
     put_change(changeset, :password, Comeonin.Pbkdf2.hashpwsalt(password))
   end
   defp hash_password(changeset), do: changeset
