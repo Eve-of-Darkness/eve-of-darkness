@@ -5,16 +5,14 @@ defmodule EOD.Socket.TCP.GameSocket do
   decoding of messages to help hide away the network level details
   of the packets being used.
   """
+  alias EOD.Socket.TCP
+
   defstruct socket: nil
 
   @doc """
   Requires a :gen_tcp socket
   """
   def new(socket) when is_port(socket), do: %__MODULE__{socket: socket}
-end
-
-defimpl EOD.Socket, for: EOD.Socket.TCP.GameSocket do
-  alias EOD.Socket.TCP
 
   def send(%{socket: socket}, data=%TCP.ServerPacket{}) do
     with {:ok, io_list} <- TCP.ServerPacket.to_iolist(data),
@@ -29,9 +27,40 @@ defimpl EOD.Socket, for: EOD.Socket.TCP.GameSocket do
   def recv(%{socket: socket}) do
     with \
       {:ok, data} <- :gen_tcp.recv(socket, 0),
-      {:ok, packet} <- TCP.ClientPacket.from_binary(data),
-    do: TCP.Encoding.decode(packet)
+      {:ok, packet} <- TCP.ClientPacket.from_binary(data)
+    do
+      TCP.Encoding.decode(packet)
+    else
+      {:error, error} ->
+        {:error, error}
+
+      {:partial, bin, remaining} ->
+        with {:ok, packet} = fill(socket, bin, remaining) do
+          TCP.Encoding.decode(packet)
+        end
+    end
   end
 
   def close(%{socket: socket}), do: :gen_tcp.close(socket)
+
+  defp fill(socket, bin, remaining) do
+    with {:ok, data} <- :gen_tcp.recv(socket, remaining) do
+      data_size = byte_size(data)
+
+      cond do
+        data_size == remaining ->
+          TCP.ClientPacket.from_binary(bin<>data)
+        data_size < remaining ->
+          fill(socket, bin<>data, remaining - data_size)
+        data_size > remaining ->
+          {:error, :tcp_stream_overflow}
+      end
+    end
+  end
+end
+
+defimpl EOD.Socket, for: EOD.Socket.TCP.GameSocket do
+  def send(socket, data), do: EOD.Socket.TCP.GameSocket.send(socket, data)
+  def recv(socket), do: EOD.Socket.TCP.GameSocket.recv(socket)
+  def close(socket), do: EOD.Socket.TCP.GameSocket.close(socket)
 end

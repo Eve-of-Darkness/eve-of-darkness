@@ -49,33 +49,19 @@ defmodule EOD.Client do
   end
 
   def handle_info({{:game_packet, ref}, packet}, state=%{ref: ref}) do
+    require Client.LoginPacketHandler
+    require Client.CharacterSelectPacketHandler
     updated =
       case packet.id do
-        id when id in [:handshake_request, :login_request] ->
-          Client.Login.handle_packet(state, packet)
+        id when id in Client.LoginPacketHandler.handles ->
+          Client.LoginPacketHandler.handle_packet(state, packet)
 
         :ping_request ->
           EOD.Socket.send(state.tcp_socket, %{ packet | id: :ping_reply })
           state
 
-        :char_select_request ->
-          # TODO: Currently blindly just sending session; however, in the future
-          # this needs to check :name on the packet for a character
-          EOD.Socket.send(state.tcp_socket, %{ id: :session_id, session_id: state.session_id })
-          state
-
-        :char_overview_request ->
-          # TODO: Currently **not** doing any processing on this, just sending blank list of
-          # characters for now to get this flow working
-          if packet.realm == :none do
-            EOD.Socket.send(state.tcp_socket, %{ id: :realm, realm: :none })
-          else
-            EOD.Socket.send(state.tcp_socket, %{ id: :realm, realm: packet.realm })
-            EOD.Socket.send(state.tcp_socket,
-                            %{ id: :char_overview, characters: [],
-                               username: state.account.username })
-          end
-          state
+        id when id in Client.CharacterSelectPacketHandler.handles ->
+          Client.CharacterSelectPacketHandler.handle_packet(state, packet)
 
         _ ->
           state
@@ -88,7 +74,8 @@ defmodule EOD.Client do
       :closed ->
         {:stop, :normal, state}
 
-      _ ->
+      reason ->
+        Logger.error "Packet Error: #{reason}"
         {:noreply, state}
     end
   end
