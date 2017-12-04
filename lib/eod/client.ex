@@ -18,7 +18,9 @@ defmodule EOD.Client do
             session_id: nil,
             ref: nil,
             state: :unknown,
-            session_id: nil
+            session_id: nil,
+            selected_realm: :none,
+            characters: []
 
   def start_link(init_state=%__MODULE__{}) do
     GenServer.start_link(__MODULE__, init_state)

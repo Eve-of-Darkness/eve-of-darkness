@@ -13,6 +13,7 @@ defmodule EOD.Socket.TCP.Encoding do
     ping_request: { 0xA3, Encoding.PingRequest },
     char_select_request: { 0x10, Encoding.CharacterSelectRequest },
     char_overview_request: { 0xFC, Encoding.CharacterOverviewRequest },
+    char_crud_request: { 0xFF, Encoding.CharacterCrudRequest },
     character_name_check: { 0xCB, Encoding.CharacterNameCheck }
   }
 
