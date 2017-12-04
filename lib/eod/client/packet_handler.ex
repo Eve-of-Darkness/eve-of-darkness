@@ -8,6 +8,8 @@ defmodule EOD.Client.PacketHandler do
 
   alias EOD.{Client, Socket}
 
+  @valid_realms ~w(albion hibernia midgard none)a
+
   defmacro __using__(_) do
     quote do
       import EOD.Client.PacketHandler, only: [
@@ -15,7 +17,8 @@ defmodule EOD.Client.PacketHandler do
         disconnect!: 1,
         change_state: 2,
         register_client_session: 1,
-        set_account: 2
+        set_account: 2,
+        select_realm: 2
       ]
 
       def handle_packet(client, packet=%{id: packet_id}) do
@@ -31,6 +34,10 @@ defmodule EOD.Client.PacketHandler do
   @doc """
   Sends a message to the connected game client via TCP
   """
+  def send_tcp(%Client{tcp_socket: socket}=client, fun) when is_function(fun) do
+    Socket.send(socket, fun.(client))
+    client
+  end
   def send_tcp(%Client{tcp_socket: socket}=client, msg) do
     Socket.send(socket, msg)
     client
@@ -56,6 +63,12 @@ defmodule EOD.Client.PacketHandler do
   """
   def set_account(%Client{}=client, %EOD.Repo.Account{}=account) do
     %{ client | account: account }
+  end
+
+  @doc """
+  """
+  def select_realm(%Client{}=client, realm) when realm in @valid_realms do
+    %{ client | selected_realm: realm }
   end
 
   @doc """
