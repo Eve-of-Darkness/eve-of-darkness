@@ -1,0 +1,38 @@
+defmodule EOD.Packet.Field.Blank do
+  use EOD.Packet.Field
+  import EOD.Packet.OptSize
+
+  def struct_field_pair(_), do: nil
+
+  def from_binary_match({_, :remaining}) do
+    quote do
+      _ :: binary
+    end
+  end
+  def from_binary_match({_, opts}) do
+    size = number_size_opt(:blank, opts)
+
+    quote do
+      _ :: unquote(size)
+    end
+  end
+
+  def from_binary_struct(_), do: nil
+
+  def to_binary_match(_), do: nil
+
+  def to_binary_bin({_, :remaining}), do: nil
+  def to_binary_bin({_, opts}) do
+    using = Keyword.get(opts, :using, 0)
+    size = number_size_opt(:blank, opts)
+
+    quote do
+      unquote(using) :: unquote(size)
+    end
+  end
+
+  def size({_, opts}) do
+    number_size_opt(:blank, opts)
+  end
+end
+
