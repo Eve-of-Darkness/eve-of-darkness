@@ -53,13 +53,20 @@ defmodule EOD.Client do
   def handle_info({{:game_packet, ref}, packet}, state=%{ref: ref}) do
     require Client.LoginPacketHandler
     require Client.CharacterSelectPacketHandler
+    alias EOD.Packet.Server.PingReply
+
     updated =
       case packet.id do
         id when id in Client.LoginPacketHandler.handles ->
           Client.LoginPacketHandler.handle_packet(state, packet)
 
         :ping_request ->
-          EOD.Socket.send(state.tcp_socket, %{ packet | id: :ping_reply })
+          EOD.Socket.send(
+            state.tcp_socket, %PingReply{
+              timestamp: packet.data.timestamp,
+              sequence: packet.sequence + 1
+            }
+          )
           state
 
         id when id in Client.CharacterSelectPacketHandler.handles ->
@@ -68,6 +75,7 @@ defmodule EOD.Client do
         _ ->
           state
       end
+
     {:noreply, updated}
   end
 

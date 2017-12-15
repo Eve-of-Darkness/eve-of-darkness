@@ -8,6 +8,7 @@ defmodule EOD.Packet.Client.HandShakeRequest do
   """
   use EOD.Packet do
     code 0xF4
+    id :handshake_request
 
     field :addons, :integer, size: [bits: 4]
     field :type,   :integer, size: [bits: 4]

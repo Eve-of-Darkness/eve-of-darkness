@@ -4,6 +4,8 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
   alias EOD.TestSocket
   alias EOD.Socket
   import EOD.Client.CharacterSelectPacketHandler
+  alias EOD.Packet.Server.{AssignSession}
+  alias EOD.Packet.Server.CharacterOverviewResponse, as: CharOverviewResp
 
   setup tags do
     {:ok, socket} = TestSocket.start_link
@@ -20,23 +22,26 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
 
   test "#char_select_request", context do
     assert %Client{} = char_select_request(context.client, %{})
-    assert %{id: :session_id, session_id: 7} = Socket.recv(context.socket) |> ok!
+    assert %AssignSession{session_id: 7} = Socket.recv(context.socket) |> ok!
   end
 
   describe "#character_name_check" do
     setup tags do
+      alias EOD.Packet.Client.CharacterNameCheckRequest, as: NameCheckReq
+      alias EOD.Packet.Server.CharacterNameCheckReply, as: NameCheckReply
+      alias EOD.Socket.TCP.ClientPacket
+
       if tags[:existing_name], do: insert(:character, name: tags[:existing_name])
 
-      assert %Client{} =
-        character_name_check(tags.client, %{character_name: tags[:name]})
+      packet = %ClientPacket{data: %NameCheckReq{character_name: tags[:name]}}
+      assert %Client{} = character_name_check(tags.client, packet)
 
-      msg = Socket.recv(tags.socket) |> ok!
+      resp = %NameCheckReply{} = Socket.recv(tags.socket) |> ok!
 
-      assert msg[:id] == :character_name_check_reply
-      assert msg[:character_name] == tags[:name]
-      assert msg[:username] == tags.account.username
+      assert resp.character_name == tags[:name]
+      assert resp.username == tags.account.username
 
-      {:ok, msg: msg}
+      {:ok, msg: resp}
     end
 
     @tag name: "bb"
@@ -46,7 +51,7 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
 
     @tag name: "benfalk"
     test "right size and not taken is valid", %{msg: msg} do
-      assert %{status: :ok} = msg
+      assert %{status: :valid} = msg
     end
 
     @tag name: "mrbig", existing_name: "mrbig"
@@ -56,13 +61,17 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
   end
 
   describe "#char_overview_request" do
+    alias EOD.Packet.Server.{Realm}
     setup tags do
+      alias EOD.Packet.Client.CharacterOverviewRequest, as: CharOverviewReq
+      alias EOD.Socket.TCP.ClientPacket
       alb = insert(:character, account: tags.account, realm: 1, slot: 0, name: "alb")
       mid = insert(:character, account: tags.account, realm: 2, slot: 0, name: "mid")
       hib = insert(:character, account: tags.account, realm: 3, slot: 0, name: "hib")
       insert(:character, realm: 1, name: "differentowner")
 
-      client = %Client{} = char_overview_request(tags.client, %{realm: tags[:realm]})
+      packet = %ClientPacket{data: %CharOverviewReq{realm: tags[:realm]}}
+      client = %Client{} = char_overview_request(tags.client, packet)
       {:ok,
         alb: alb,
         mid: mid,
@@ -73,53 +82,62 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
     @tag realm: :none
     test "no realm is selcted", context do
       assert context.client.characters == []
-      assert %{id: :realm, realm: :none} = Socket.recv(context.socket) |> ok!
+      assert %Realm{realm: :none} = Socket.recv(context.socket) |> ok!
     end
 
     @tag realm: :albion
     test ":albion selected returns alb characters", context do
       char_ids = context.client.characters |> Enum.map(& &1.id)
       assert [context.alb.id] == char_ids
-      assert %{id: :realm, realm: :albion} = Socket.recv(context.socket) |> ok!
-      assert %{id: :char_overview, characters: [char]} = msg =
+      assert %Realm{realm: :albion} = Socket.recv(context.socket) |> ok!
+      assert %CharOverviewResp{characters: [char|_]} = resp =
         Socket.recv(context.socket) |> ok!
-      assert msg[:username] == context.account.username
-      assert char.id == context.alb.id
+      assert resp.username == context.account.username
+      assert char.name == context.alb.name
     end
 
     @tag realm: :midgard
     test ":midgard selected returns mid characters", context do
       char_ids = context.client.characters |> Enum.map(& &1.id)
       assert [context.mid.id] == char_ids
-      assert %{id: :realm, realm: :midgard} = Socket.recv(context.socket) |> ok!
-      assert %{id: :char_overview, characters: [char]} = msg =
+      assert %Realm{realm: :midgard} = Socket.recv(context.socket) |> ok!
+      assert %CharOverviewResp{characters: [char|_]} = resp =
         Socket.recv(context.socket) |> ok!
-      assert msg[:username] == context.account.username
-      assert char.id == context.mid.id
+      assert resp.username == context.account.username
+      assert char.name == context.mid.name
     end
 
     @tag realm: :hibernia
     test ":hibernia selected returns hib characters", context do
       char_ids = context.client.characters |> Enum.map(& &1.id)
       assert [context.hib.id] == char_ids
-      assert %{id: :realm, realm: :hibernia} = Socket.recv(context.socket) |> ok!
-      assert %{id: :char_overview, characters: [char]} = msg =
+      assert %Realm{realm: :hibernia} = Socket.recv(context.socket) |> ok!
+      assert %CharOverviewResp{characters: [char|_]} = resp =
         Socket.recv(context.socket) |> ok!
-      assert msg[:username] == context.account.username
-      assert char.id == context.hib.id
+      assert resp.username == context.account.username
+      assert char.name == context.hib.name
     end
   end
 
   describe "#char_crud_request" do
+    alias EOD.Packet.Client.CharacterCrudRequest, as: CharCrudReq
     setup tags do
       {:ok, client: %{ tags.client | selected_realm: :albion }}
     end
 
     test "creating a character", context do
-      packet = %{action: :create, characters: [params_for(:character, name: "ben")]}
+      alias EOD.Socket.TCP.ClientPacket
+      blanks = 1..9 |> Enum.map(fn _ -> %CharCrudReq.Character{action: :create} end)
+      ben =
+        params_for(:character, name: "ben")
+        |> Enum.reduce(%CharCrudReq.Character{}, fn {k, v}, char -> Map.put(char, k, v) end)
+        |> Map.put(:action, :create)
+
+      packet = %ClientPacket{data: %CharCrudReq{characters: [ben|blanks]}}
       client = %Client{} = char_crud_request(context.client, packet)
       [char] = client.characters
       assert char.name == "ben"
+      assert char.slot == 0
     end
   end
 

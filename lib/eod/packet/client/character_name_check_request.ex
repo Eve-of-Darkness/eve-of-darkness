@@ -9,6 +9,7 @@ defmodule EOD.Packet.Client.CharacterNameCheckRequest do
   """
   use EOD.Packet do
     code 0xCB
+    id :character_name_check
 
     field :character_name, :c_string, size: [bytes: 30]
     field :username,       :c_string, size: [bytes: 24]

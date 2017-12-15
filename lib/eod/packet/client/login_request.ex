@@ -11,6 +11,7 @@ defmodule EOD.Packet.Client.LoginRequest do
   """
   use EOD.Packet do
     code 0xA7
+    id :login_request
 
     blank using: 0x00, size: [bytes: 7]
     field :username, :pascal_string, type: :little, size: 2
