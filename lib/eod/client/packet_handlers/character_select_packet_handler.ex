@@ -34,7 +34,7 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
   will also send a character overview, which is a list of all the characters
   they have.
   """
-  def char_overview_request(client, %{data: packet}) do
+  def char_overview_request(client, packet) do
     client
     |> select_realm(packet.realm)
     |> send_tcp(%Realm{realm: packet.realm})
@@ -53,7 +53,7 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
   check runs before the call to create a character happens so there is
   still an opportunity for the name to be a duplicate at the worst.
   """
-  def character_name_check(client, %{data: %{character_name: name}}) do
+  def character_name_check(client, %{character_name: name}) do
     status = cond do
       Character.invalid_name?(name) -> :invalid
       Character.name_taken?(name) -> :duplicate
@@ -73,7 +73,7 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
   as well as the `:action` hint to decide what characters to create or
   delete.
   """
-  def char_crud_request(client, %{data: packet=%{characters: [%{action: :create}|_]}}) do
+  def char_crud_request(client, packet=%{characters: [%{action: :create}|_]}) do
     packet.characters
     |> Enum.with_index
     |> Enum.map(fn {char, index} -> Map.put(char, :slot, index) end)
@@ -91,7 +91,7 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
     |> load_characters
     |> send_tcp(&char_overview_msg(&1))
   end
-  def char_crud_request(client, %{data: packet=%{characters: [%{action: :delete}|_]}}) do
+  def char_crud_request(client, packet=%{characters: [%{action: :delete}|_]}) do
     packet_characters =
       Enum.with_index(packet.characters)
       |> Enum.map(fn {char, index} -> Map.put(char, :slot, index) end)

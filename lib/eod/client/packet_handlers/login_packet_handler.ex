@@ -13,14 +13,14 @@ defmodule EOD.Client.LoginPacketHandler do
     end
   end
 
-  def handshake_request(client=%Client{state: :unknown}, %{data: data}) do
+  def handshake_request(client=%Client{state: :unknown}, data) do
     client
     |> send_tcp(handshake_response(data))
     |> change_state(:handshake)
     |> extract_version_to_client(data)
   end
 
-  def login_request(client=%Client{state: :handshake}, %{data: data}) do
+  def login_request(client=%Client{state: :handshake}, data) do
     with \
       {:ok, account} <- find_or_create_account(data),
       {:ok, registered_client} <- register_client_session(client)

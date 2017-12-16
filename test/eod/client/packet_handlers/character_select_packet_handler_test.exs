@@ -29,11 +29,10 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
     setup tags do
       alias EOD.Packet.Client.CharacterNameCheckRequest, as: NameCheckReq
       alias EOD.Packet.Server.CharacterNameCheckReply, as: NameCheckReply
-      alias EOD.Socket.TCP.ClientPacket
 
       if tags[:existing_name], do: insert(:character, name: tags[:existing_name])
 
-      packet = %ClientPacket{data: %NameCheckReq{character_name: tags[:name]}}
+      packet = %NameCheckReq{character_name: tags[:name]}
       assert %Client{} = character_name_check(tags.client, packet)
 
       resp = %NameCheckReply{} = Socket.recv(tags.socket) |> ok!
@@ -64,13 +63,12 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
     alias EOD.Packet.Server.{Realm}
     setup tags do
       alias EOD.Packet.Client.CharacterOverviewRequest, as: CharOverviewReq
-      alias EOD.Socket.TCP.ClientPacket
       alb = insert(:character, account: tags.account, realm: 1, slot: 0, name: "alb")
       mid = insert(:character, account: tags.account, realm: 2, slot: 0, name: "mid")
       hib = insert(:character, account: tags.account, realm: 3, slot: 0, name: "hib")
       insert(:character, realm: 1, name: "differentowner")
 
-      packet = %ClientPacket{data: %CharOverviewReq{realm: tags[:realm]}}
+      packet = %CharOverviewReq{realm: tags[:realm]}
       client = %Client{} = char_overview_request(tags.client, packet)
       {:ok,
         alb: alb,
@@ -126,14 +124,13 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
     end
 
     test "creating a character", context do
-      alias EOD.Socket.TCP.ClientPacket
       blanks = 1..9 |> Enum.map(fn _ -> %CharCrudReq.Character{action: :create} end)
       ben =
         params_for(:character, name: "ben")
         |> Enum.reduce(%CharCrudReq.Character{}, fn {k, v}, char -> Map.put(char, k, v) end)
         |> Map.put(:action, :create)
 
-      packet = %ClientPacket{data: %CharCrudReq{characters: [ben|blanks]}}
+      packet = %CharCrudReq{characters: [ben|blanks]}
       client = %Client{} = char_crud_request(context.client, packet)
       [char] = client.characters
       assert char.name == "ben"
