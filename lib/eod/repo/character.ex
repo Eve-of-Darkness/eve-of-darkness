@@ -8,7 +8,7 @@ defmodule EOD.Repo.Character do
 
   @required @permitted
 
-  @name_format ~r/^[a-z]{3,20}$/
+  @name_format ~r/^[A-Z]{0,1}[a-z]{3,20}$/
 
   schema "characters" do
     field :realm, :integer

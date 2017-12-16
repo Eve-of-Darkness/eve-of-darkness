@@ -6,7 +6,7 @@ defimpl Inspect, for: EOD.Socket.TCP.ClientPacket do
   def inspect(packet, _opts) do
     """
     %EOD.Socket.TcpClientPacket{
-      id: #{packet.id && "0x"<>hex(packet.id)}, size: #{packet.size},
+      id: #{packet_id(packet.id)}, size: #{packet.size},
       session_id: #{packet.session_id}, parameter: #{packet.parameter},
       sequence: #{packet.sequence}, check: #{packet.check},
       data:
@@ -15,7 +15,7 @@ defimpl Inspect, for: EOD.Socket.TCP.ClientPacket do
     """
   end
 
-  defp readable_data_binary(data) do
+  defp readable_data_binary(data) when is_binary(data) do
     for(<<byte::8 <- data>>, do: byte)
     |> Enum.chunk_every(12, 12, Stream.repeatedly(fn -> nil end))
     |> Enum.map(fn byte_list ->
@@ -23,6 +23,13 @@ defimpl Inspect, for: EOD.Socket.TCP.ClientPacket do
     end)
     |> Enum.join("\n")
   end
+  defp readable_data_binary(data) when is_map(data) do
+    "    #{inspect data}"
+  end
+
+  defp packet_id(id) when is_nil(id), do: "nil"
+  defp packet_id(id) when is_atom(id), do: id
+  defp packet_id(id) when is_integer(id), do: "0x"<>hex(id)
 
   defp hex(num) when is_integer(num), do: Base.encode16(<<num::8>>)
   defp hex(byte) when byte_size(byte) == 1, do: Base.encode16(byte)

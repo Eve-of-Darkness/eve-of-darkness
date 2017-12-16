@@ -13,6 +13,7 @@ defmodule EOD.Packet.Client.CharacterCrudRequest do
   """
   use EOD.Packet do
     code 0xFF
+    id :char_crud_request
 
     structure Character do
       blank               using: 0x00,  size: [bytes: 4]

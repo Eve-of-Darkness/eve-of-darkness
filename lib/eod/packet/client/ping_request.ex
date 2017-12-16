@@ -9,6 +9,7 @@ defmodule EOD.Packet.Client.PingRequest do
   """
   use EOD.Packet do
     code 0xA3
+    id :ping_request
 
     blank using: 0x00, size: [bytes: 4]
     field :timestamp, :integer, size: [bytes: 4]

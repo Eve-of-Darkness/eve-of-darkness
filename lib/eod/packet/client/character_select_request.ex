@@ -17,6 +17,7 @@ defmodule EOD.Packet.Client.CharacterSelectRequest do
   """
   use EOD.Packet do
     code 0x10
+    id :char_select_request
 
     blank using: 0x00, size: [bytes: 5]
     field :char_name,  :c_string,  size: [bytes: 24]

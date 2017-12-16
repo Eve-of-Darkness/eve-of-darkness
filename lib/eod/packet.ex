@@ -45,6 +45,12 @@ defmodule EOD.Packet do
     end
   end
 
+  defmacro id(id) do
+    quote do
+      def packet_id, do: unquote(id)
+    end
+  end
+
   @doc """
   Creates a field that maps from a binary to the struct.  The magic behind
   this is the various different `types` that are supported. Each field

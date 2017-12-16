@@ -21,8 +21,8 @@ defmodule EOD.Client.PacketHandler do
         select_realm: 2
       ]
 
-      def handle_packet(client, packet=%{id: packet_id}) do
-        apply(__MODULE__, packet_id, [client, packet])
+      def handle_packet(client, packet=%{id: packet_id, data: data}) do
+        apply(__MODULE__, packet_id, [client, data])
       end
 
       defoverridable [handle_packet: 2]
