@@ -18,7 +18,8 @@ defmodule EOD.Client.PacketHandler do
         change_state: 2,
         register_client_session: 1,
         set_account: 2,
-        select_realm: 2
+        select_realm: 2,
+        handles_packets: 1,
       ]
 
       def handle_packet(client, packet=%{id: packet_id, data: data}) do
@@ -28,6 +29,19 @@ defmodule EOD.Client.PacketHandler do
       defoverridable [handle_packet: 2]
 
       alias EOD.Client
+    end
+  end
+
+  @doc """
+  This is an abstraction to provide an "inside-out" routing system.  Use this
+  to declare what packets a packet handler uses, and this macro will create
+  information that can be used later with a routing system.
+  """
+  defmacro handles_packets(packets) do
+    packets = Enum.map(packets, &Macro.expand(&1, __CALLER__))
+    ids = Enum.map(packets, &apply(&1, :packet_id, []))
+    quote do
+      defmacro handles, do: unquote(ids)
     end
   end
 

@@ -9,13 +9,12 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
   alias EOD.Repo.Character
   alias EOD.Packet.Server.{AssignSession, Realm, CharacterNameCheckReply}
 
-  defmacro handles do
-    quote do: [
-      :char_select_request,
-      :char_overview_request,
-      :character_name_check,
-      :char_crud_request]
-  end
+  handles_packets [
+    EOD.Packet.Client.CharacterSelectRequest,
+    EOD.Packet.Client.CharacterOverviewRequest,
+    EOD.Packet.Client.CharacterNameCheckRequest,
+    EOD.Packet.Client.CharacterCrudRequest
+  ]
 
   @doc """
   Before loading into the world, the server needs to know what character the
