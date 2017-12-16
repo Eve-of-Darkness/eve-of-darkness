@@ -20,9 +20,36 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
       socket: TestSocket.set_role(socket, :client)}
   end
 
-  test "#char_select_request", context do
-    assert %Client{} = char_select_request(context.client, %{})
-    assert %AssignSession{session_id: 7} = Socket.recv(context.socket) |> ok!
+  describe "#char_select_request" do
+    setup tags do
+      alias EOD.Packet.Client.CharacterSelectRequest, as: CharSelReq
+      chars = [
+        insert(:character, name: "Ben", slot: 0),
+        insert(:character, name: "Seb", slot: 5)
+      ]
+
+      client = %{ tags.client | characters: chars }
+      packet = %CharSelReq{char_name: tags[:selected_name]}
+
+      assert client = %Client{} = char_select_request(client, packet)
+      assert %AssignSession{session_id: 7} = Socket.recv(tags.socket) |> ok!
+
+      {:ok, client: client}
+    end
+
+    test "character special flag of `noname` sets character to `none`", context do
+      assert context.client.selected_character == :none
+    end
+
+    @tag selected_name: "Seb"
+    test "a correct character name sets selected character", context do
+      assert context.client.selected_character.name == "Seb"
+    end
+
+    @tag selected_name: "Roflcopters"
+    test "an unknown name sets selected_character to none", context do
+      assert context.client.selected_character == :none
+    end
   end
 
   describe "#character_name_check" do

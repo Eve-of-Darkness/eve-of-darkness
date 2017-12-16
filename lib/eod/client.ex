@@ -20,6 +20,7 @@ defmodule EOD.Client do
             state: :unknown,
             session_id: nil,
             selected_realm: :none,
+            selected_character: :none,
             characters: []
 
   def start_link(init_state=%__MODULE__{}) do
