@@ -75,10 +75,26 @@ defmodule EOD.TestSocket do
     %{ socket | role: role }
   end
 
+  @doc """
+  Returns true if the socket has been disconnected.  This is to test w/o having
+  to attempt to send or receive data and check for `{:error, :closed}`
+  """
+  def disconnected?(%__MODULE__{pid: pid}) do
+    if Process.alive?(pid) do
+      GenServer.call(pid, :disconnected?)
+    else
+      true
+    end
+  end
+
   # GenServer Callbacks
 
   def handle_info({:shutdown, ref}, %{ref: ref}=state) do
     {:stop, :normal, state}
+  end
+
+  def handle_call(:disconnected?, _, state) do
+    {:reply, state.state == :closed, state}
   end
 
   def handle_call(:close, _, state) do

@@ -7,11 +7,10 @@ defmodule EOD.Client.LoginPacketHandler do
 
   @version_keys [:build, :major, :minor, :patch, :rev]
 
-  defmacro handles do
-    quote do
-      [:handshake_request, :login_request]
-    end
-  end
+  handles_packets [
+    EOD.Packet.Client.HandShakeRequest,
+    EOD.Packet.Client.LoginRequest
+  ]
 
   def handshake_request(client=%Client{state: :unknown}, data) do
     client

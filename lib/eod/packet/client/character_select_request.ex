@@ -1,7 +1,7 @@
 defmodule EOD.Packet.Client.CharacterSelectRequest do
   @moduledoc """
   This packet is sent by the client to identify what character
-  is selected by the use.  The first five bytes are somewhat of
+  is selected by the user.  The first five bytes are somewhat of
   a myster; however, the next 24 bytes hold the characters name.
 
   A special string of `noname` for the char_name indicates that

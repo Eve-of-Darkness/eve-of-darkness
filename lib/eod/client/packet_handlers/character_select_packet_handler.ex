@@ -9,23 +9,22 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
   alias EOD.Repo.Character
   alias EOD.Packet.Server.{AssignSession, Realm, CharacterNameCheckReply}
 
-  defmacro handles do
-    quote do: [
-      :char_select_request,
-      :char_overview_request,
-      :character_name_check,
-      :char_crud_request]
-  end
+  handles_packets [
+    EOD.Packet.Client.CharacterSelectRequest,
+    EOD.Packet.Client.CharacterOverviewRequest,
+    EOD.Packet.Client.CharacterNameCheckRequest,
+    EOD.Packet.Client.CharacterCrudRequest
+  ]
 
   @doc """
-  This is a fairly mysterious request; it sends a character name but
-  not fully sure what it's for.  This request also expects to be given
-  a session id so this sends it down to the client.
+  Before loading into the world, the server needs to know what character the
+  user intends to use; this takes the character select request and sets the
+  client up with the selected character.
   """
-  def char_select_request(client, _packet) do
-    # TODO: Currently blindly just sending session; however, in the future
-    # this needs to check :name on the packet for a character
-    client |> send_tcp(%AssignSession{session_id: client.session_id})
+  def char_select_request(client, %{char_name: name}) do
+    client
+    |> set_selected_character(name)
+    |> send_tcp(%AssignSession{session_id: client.session_id})
   end
 
   @doc """
@@ -109,6 +108,14 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
   end
 
   # Private Methods
+
+  defp set_selected_character(client, "noname") do
+    %{ client | selected_character: :none }
+  end
+  defp set_selected_character(client, char_name) do
+    character = Enum.find(client.characters, &(&1.name == char_name))
+    %{ client | selected_character: character || :none }
+  end
 
   defp load_characters(%{select_realm: :none}=client) do
     %{ client | characters: [] }
