@@ -39,7 +39,10 @@ defmodule EOD.Client.Manager do
 
   defp client_supervisor do
     alias EOD.Client
-    spec = Supervisor.child_spec(Client, start: {Client, :start_link, []})
+    spec = Supervisor.child_spec(
+      Client,
+      start: {Client, :start_link, []},
+      restart: :transient)
     Supervisor.start_link([spec], strategy: :simple_one_for_one)
   end
 end
