@@ -9,6 +9,8 @@ defmodule EOD.Socket.TCP.Encoding do
   require Logger
 
   @client_packets [
+    Client.AcknowledgeSession,
+    Client.ClosingConnection,
     Client.CharacterCrudRequest,
     Client.CharacterNameCheckRequest,
     Client.CharacterOverviewRequest,

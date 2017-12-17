@@ -1,38 +1,23 @@
 defmodule EOD.Client.CharacterSelectPacketHandlerTest do
-  use EOD.RepoCase, async: true
-  alias EOD.Client
-  alias EOD.TestSocket
-  alias EOD.Socket
-  import EOD.Client.CharacterSelectPacketHandler
-  alias EOD.Packet.Server.{AssignSession}
-  alias EOD.Packet.Server.CharacterOverviewResponse, as: CharOverviewResp
+  use EOD.PacketHandlerCase, async: true
+  alias Packet.Server.{AssignSession}
+  alias Packet.Server.CharacterOverviewResponse, as: CharOverviewResp
 
-  setup tags do
-    {:ok, socket} = TestSocket.start_link
-    account = insert(:account)
-
-    {:ok,
-      client: %Client{session_id: tags[:session_id] || 7,
-                      tcp_socket: socket,
-                      account: account},
-
-      account: account,
-      socket: TestSocket.set_role(socket, :client)}
+  setup _ do
+    {:ok, handler: EOD.Client.CharacterSelectPacketHandler}
   end
 
   describe "#char_select_request" do
     setup tags do
-      alias EOD.Packet.Client.CharacterSelectRequest, as: CharSelReq
+      alias Packet.Client.CharacterSelectRequest, as: CharSelReq
       chars = [
         insert(:character, name: "Ben", slot: 0),
         insert(:character, name: "Seb", slot: 5)
       ]
 
-      client = %{ tags.client | characters: chars }
       packet = %CharSelReq{char_name: tags[:selected_name]}
-
-      assert client = %Client{} = char_select_request(client, packet)
-      assert %AssignSession{session_id: 7} = Socket.recv(tags.socket) |> ok!
+      client = tags |> update_client(characters: chars) |> handle_packet(packet)
+      assert %AssignSession{session_id: 7} = received_packet(tags)
 
       {:ok, client: client}
     end
@@ -60,9 +45,9 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
       if tags[:existing_name], do: insert(:character, name: tags[:existing_name])
 
       packet = %NameCheckReq{character_name: tags[:name]}
-      assert %Client{} = character_name_check(tags.client, packet)
+      handle_packet(tags, packet)
 
-      resp = %NameCheckReply{} = Socket.recv(tags.socket) |> ok!
+      resp = %NameCheckReply{} = received_packet(tags)
 
       assert resp.character_name == tags[:name]
       assert resp.username == tags.account.username
@@ -95,8 +80,7 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
       hib = insert(:character, account: tags.account, realm: 3, slot: 0, name: "hib")
       insert(:character, realm: 1, name: "differentowner")
 
-      packet = %CharOverviewReq{realm: tags[:realm]}
-      client = %Client{} = char_overview_request(tags.client, packet)
+      client = handle_packet(tags, %CharOverviewReq{realm: tags[:realm]})
       {:ok,
         alb: alb,
         mid: mid,
@@ -107,16 +91,15 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
     @tag realm: :none
     test "no realm is selcted", context do
       assert context.client.characters == []
-      assert %Realm{realm: :none} = Socket.recv(context.socket) |> ok!
+      assert %Realm{realm: :none} = received_packet(context)
     end
 
     @tag realm: :albion
     test ":albion selected returns alb characters", context do
       char_ids = context.client.characters |> Enum.map(& &1.id)
       assert [context.alb.id] == char_ids
-      assert %Realm{realm: :albion} = Socket.recv(context.socket) |> ok!
-      assert %CharOverviewResp{characters: [char|_]} = resp =
-        Socket.recv(context.socket) |> ok!
+      assert %Realm{realm: :albion} = received_packet(context)
+      assert %CharOverviewResp{characters: [char|_]} = resp = received_packet(context)
       assert resp.username == context.account.username
       assert char.name == context.alb.name
     end
@@ -125,9 +108,8 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
     test ":midgard selected returns mid characters", context do
       char_ids = context.client.characters |> Enum.map(& &1.id)
       assert [context.mid.id] == char_ids
-      assert %Realm{realm: :midgard} = Socket.recv(context.socket) |> ok!
-      assert %CharOverviewResp{characters: [char|_]} = resp =
-        Socket.recv(context.socket) |> ok!
+      assert %Realm{realm: :midgard} = received_packet(context)
+      assert %CharOverviewResp{characters: [char|_]} = resp = received_packet(context)
       assert resp.username == context.account.username
       assert char.name == context.mid.name
     end
@@ -136,9 +118,8 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
     test ":hibernia selected returns hib characters", context do
       char_ids = context.client.characters |> Enum.map(& &1.id)
       assert [context.hib.id] == char_ids
-      assert %Realm{realm: :hibernia} = Socket.recv(context.socket) |> ok!
-      assert %CharOverviewResp{characters: [char|_]} = resp =
-        Socket.recv(context.socket) |> ok!
+      assert %Realm{realm: :hibernia} = received_packet(context)
+      assert %CharOverviewResp{characters: [char|_]} = resp = received_packet(context)
       assert resp.username == context.account.username
       assert char.name == context.hib.name
     end
@@ -146,6 +127,7 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
 
   describe "#char_crud_request" do
     alias EOD.Packet.Client.CharacterCrudRequest, as: CharCrudReq
+
     setup tags do
       {:ok, client: %{ tags.client | selected_realm: :albion }}
     end
@@ -158,13 +140,10 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
         |> Map.put(:action, :create)
 
       packet = %CharCrudReq{characters: [ben|blanks]}
-      client = %Client{} = char_crud_request(context.client, packet)
+      client = handle_packet(context, packet)
       [char] = client.characters
       assert char.name == "ben"
       assert char.slot == 0
     end
   end
-
-  defp ok!({:ok, packet}), do: packet
-  defp ok!(_), do: raise "It's not okay!"
 end
