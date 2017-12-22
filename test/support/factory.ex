@@ -1,6 +1,6 @@
 defmodule EOD.Repo.Factory do
   use ExMachina.Ecto, repo: EOD.Repo
-  alias EOD.Repo.{Account, Character}
+  alias EOD.Repo.{Account, Character, RegionData}
 
   def account_factory do
     %Account{
@@ -37,6 +37,15 @@ defmodule EOD.Repo.Factory do
       empathy: 60,
       charisma: 60,
       account: build(:account)
+    }
+  end
+
+  def region_data_factory do
+    %RegionData{
+      region_id: 27,
+      name: "region027",
+      description: "Tutorial",
+      enabled: true
     }
   end
 end

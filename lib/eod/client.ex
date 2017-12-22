@@ -18,7 +18,6 @@ defmodule EOD.Client do
             session_id: nil,
             ref: nil,
             state: :unknown,
-            session_id: nil,
             selected_realm: :none,
             selected_character: :none,
             characters: []
