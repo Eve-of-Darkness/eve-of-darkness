@@ -31,7 +31,7 @@ defmodule EOD.Server.ConnManager do
         tuple of {any(), client}
   """
   def start_link(opts \\ []) do
-    with {:ok, port} <- opts |> Keyword.get(:port, 10300) |> parse_port,
+    with {:ok, port} <- opts |> Keyword.get(:port, 10_300) |> parse_port,
          {:ok, clbk} <- opts |> Keyword.get(:callback, def_clbk()) |> check_callback,
          {:ok, wrap} <- opts |> Keyword.get(:wrap, :none) |> check_wrap,
          {:ok, sock} <- :gen_tcp.listen(port, [:binary, active: false, reuseaddr: true])
@@ -63,7 +63,7 @@ defmodule EOD.Server.ConnManager do
 
   # Private Functions
 
-  defp parse_port(num) when is_integer(num) and num in 1..65535, do: {:ok, num}
+  defp parse_port(num) when is_integer(num) and num in 1..65_535, do: {:ok, num}
   defp parse_port(num) when is_binary(num) do
     case Integer.parse(num) do
       {port, ""} -> parse_port(port)
@@ -74,17 +74,17 @@ defmodule EOD.Server.ConnManager do
 
   defp def_clbk, do: {:send, :new_conn, self()}
 
-  defp check_callback(clbk={:send, _, pid}) when is_pid(pid), do: {:ok, clbk}
+  defp check_callback({:send, _, pid} = clbk) when is_pid(pid), do: {:ok, clbk}
 
   defp check_wrap(:none), do: {:ok, :none}
-  defp check_wrap(wrap={module, fun, args})
+  defp check_wrap({module, fun, args} = wrap)
     when is_atom(module) and is_atom(fun) and is_list(args), do: {:ok, wrap}
   defp check_wrap(_), do: {:error, :invalid_wrap}
 
   defp start_accepting(state) do
     {:ok, supervisor} = Task.Supervisor.start_link(restart: :permanent)
     Task.Supervisor.start_child(supervisor, fn -> accept(state) end)
-    %{ state | accepting_pid: supervisor}
+    %{state | accepting_pid: supervisor}
   end
 
   defp accept(state) do

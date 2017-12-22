@@ -209,7 +209,8 @@ defmodule EOD.Packet do
     type = convert_known_types(type)
     alias EOD.Packet.Field.Enumeration
     enums =
-      Enum.filter(block, &match?({:->, [_], [[_], _]}, &1))
+      block
+      |> Enum.filter(&match?({:->, [_], [[_], _]}, &1))
       |> Enum.map(fn {_, _, [[raw], val]} -> {raw, val} end)
 
     opts = Keyword.put(opts, :enum_values, enums)

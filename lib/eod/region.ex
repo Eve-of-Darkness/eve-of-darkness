@@ -8,7 +8,7 @@ defmodule EOD.Region do
 
   defstruct data: %RegionData{}
 
-  def start_link(data=%RegionData{}, opts \\ []) do
+  def start_link(%RegionData{} = data, opts \\ []) do
     GenServer.start_link(__MODULE__, %__MODULE__{data: data}, opts)
   end
 

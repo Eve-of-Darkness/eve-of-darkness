@@ -63,7 +63,7 @@ defmodule EOD.Server do
 
   # GenServer Callbacks
 
-  def init(state=%__MODULE__{}) do
+  def init(%__MODULE__{} = state) do
     with \
       {:ok, client_manager} <- Client.Manager.start_link(),
       {:ok, region_manager} <- Region.Manager.start_link()
@@ -89,17 +89,17 @@ defmodule EOD.Server do
   end
 
   # Called when a new client connects from the conn_manager
-  def handle_info({{:new_conn, ref}, socket}, %{ref: ref}=state) do
+  def handle_info({{:new_conn, ref}, socket}, %{ref: ref} = state) do
     Client.Manager.start_client(state.client_manager, socket)
     {:noreply, state}
   end
 
-  def handle_info({:boot_conn_manager, ref}, %{ref: ref, conn_manager: nil}=state) do
+  def handle_info({:boot_conn_manager, ref}, %{ref: ref, conn_manager: nil} = state) do
     {:ok, conn_manager} = ConnManager.start_link(conn_manager_opts(state))
-    {:noreply, %{ state | conn_manager: conn_manager }}
+    {:noreply, %{state | conn_manager: conn_manager}}
   end
 
-  def handle_info({:boot_conn_manager, ref}, %{ref: ref}=state) do
+  def handle_info({:boot_conn_manager, ref}, %{ref: ref} = state) do
     {:noreply, state}
   end
 

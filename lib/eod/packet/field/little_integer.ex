@@ -1,4 +1,7 @@
 defmodule EOD.Packet.Field.LittleInteger do
+  @moduledoc """
+  A little endian integer.  This requires the size to be at least two bytes.
+  """
   use EOD.Packet.Field
 
   def struct_field_pair({name, opts}) do

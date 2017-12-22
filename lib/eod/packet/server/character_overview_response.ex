@@ -1,4 +1,9 @@
 defmodule EOD.Packet.Server.CharacterOverviewResponse do
+  @moduledoc """
+  This is sent to the client when they are on the character select
+  screen and contains the information for all slots regardless of
+  if there is a character for that slot or not.
+  """
   use EOD.Packet do
     code 0xFD
 

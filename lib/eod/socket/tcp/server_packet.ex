@@ -42,13 +42,13 @@ defmodule EOD.Socket.TCP.ServerPacket do
   """
   def to_iolist(packet) do
     {:ok,
-      [ <<IO.iodata_length(packet.data)::16>>, packet.code, packet.data ]}
+      [<<IO.iodata_length(packet.data)::16>>, packet.code, packet.data]}
   end
 
   @doc """
   Given a two byte binary or a 16bit integer, this will append it to the buffer
   """
-  def write_16(packet, <<_::16>>=data), do: append_data(packet, data)
+  def write_16(packet, <<_::16>> = data), do: append_data(packet, data)
   def write_16(packet, int) when is_integer(int) and int in 0..65_535,
     do: append_data(packet, <<int::16>>)
 
@@ -64,7 +64,7 @@ defmodule EOD.Socket.TCP.ServerPacket do
   @doc """
   Same as `write_16`, but uses 32bit (4 bytes) for an integer given
   """
-  def write_32(packet, <<_::32>>=data), do: append_data(packet, data)
+  def write_32(packet, <<_::32>> = data), do: append_data(packet, data)
   def write_32(packet, int) when is_integer(int) and int in 0..4_294_967_295,
     do: append_data(packet, <<int::32>>)
 
@@ -99,7 +99,7 @@ defmodule EOD.Socket.TCP.ServerPacket do
     Enum.reduce(1..amount, packet, fn _, pak -> write_byte(pak, byte) end)
   end
 
-  defp append_data(packet=%{data: data}, payload) do
-    %{ packet | data: [ data, payload ] }
+  defp append_data(%{data: data} = packet, payload) do
+    %{packet | data: [data, payload]}
   end
 end

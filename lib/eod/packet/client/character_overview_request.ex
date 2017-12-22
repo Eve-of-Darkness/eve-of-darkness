@@ -17,7 +17,7 @@ defmodule EOD.Packet.Client.CharacterOverviewRequest do
   end
 
   defp compound(:from_binary, :user_and_realm, string) do
-    with [name,realm] <- String.split(string, "-") do
+    with [name, realm] <- String.split(string, "-") do
       %{username: name, realm: realm_from_string(realm)}
     else
       _ -> :error

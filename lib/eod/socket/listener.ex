@@ -1,4 +1,15 @@
 defmodule EOD.Socket.Listener do
+  @moduledoc """
+  This is a simple process wrapper that reads packets from a provided
+  socket and sends them to another process.  By default the caller is
+  where packets are sent; however, this can be overriden with the
+  `receiver` opt.
+
+  The packet is sent to the receiving process as `{:packet, packet}`,
+  but this can be overriden with the `wrap` option, which defaults to
+  `:packet`.  Therefore if you use a wrap of `{:foo, :bar}` then
+  new packets messages will be in the format of `{{:foo, :bar}, packet}`
+  """
   alias EOD.Socket
 
   defstruct socket: nil,

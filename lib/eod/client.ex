@@ -22,7 +22,7 @@ defmodule EOD.Client do
             selected_character: :none,
             characters: []
 
-  def start_link(init_state=%__MODULE__{}) do
+  def start_link(%__MODULE__{} = init_state) do
     GenServer.start_link(__MODULE__, init_state)
   end
 
@@ -50,7 +50,7 @@ defmodule EOD.Client do
     {:reply, :ok, state}
   end
 
-  def handle_info({{:game_packet, ref}, packet}, state=%{ref: ref}) do
+  def handle_info({{:game_packet, ref}, packet}, %{ref: ref} = state) do
     require Client.LoginPacketHandler
     require Client.CharacterSelectPacketHandler
     require Client.ConnectivityPacketHandler
@@ -73,7 +73,7 @@ defmodule EOD.Client do
     {:noreply, updated}
   end
 
-  def handle_info({{:game_packet, ref}, :error, reason}, state=%{ref: ref}) do
+  def handle_info({{:game_packet, ref}, :error, reason}, %{ref: ref} = state) do
     case reason do
       :closed ->
         {:stop, :normal, state}
@@ -84,8 +84,8 @@ defmodule EOD.Client do
     end
   end
 
-  defp begin_listener(state=%{tcp_socket: socket, ref: ref}) do
+  defp begin_listener(%{tcp_socket: socket, ref: ref} = state) do
     alias EOD.Socket.Listener
-    %{ state | tcp_listener: Listener.start_link(socket, wrap: {:game_packet, ref})}
+    %{state | tcp_listener: Listener.start_link(socket, wrap: {:game_packet, ref})}
   end
 end

@@ -38,6 +38,7 @@ defmodule EOD.Mixfile do
      {:pbkdf2_elixir, "~> 0.12"},
    
      # Test Only Dependencies
-     {:ex_machina, "~> 2.1", only: :test}]
+     {:ex_machina, "~> 2.1", only: :test},
+     {:credo, "~> 0.8", only: [:dev, :test], runtime: false}]
   end
 end

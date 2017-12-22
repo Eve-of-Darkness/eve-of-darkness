@@ -22,7 +22,7 @@ defmodule EOD.Client.PacketHandler do
         handles_packets: 1,
       ]
 
-      def handle_packet(client, packet=%{id: packet_id, data: data}) do
+      def handle_packet(client, %{id: packet_id, data: data} = packet) do
         apply(__MODULE__, packet_id, [client, data])
       end
 
@@ -48,11 +48,11 @@ defmodule EOD.Client.PacketHandler do
   @doc """
   Sends a message to the connected game client via TCP
   """
-  def send_tcp(%Client{tcp_socket: socket}=client, fun) when is_function(fun) do
+  def send_tcp(%Client{tcp_socket: socket} = client, fun) when is_function(fun) do
     Socket.send(socket, fun.(client))
     client
   end
-  def send_tcp(%Client{tcp_socket: socket}=client, msg) do
+  def send_tcp(%Client{tcp_socket: socket} = client, msg) do
     Socket.send(socket, msg)
     client
   end
@@ -60,7 +60,7 @@ defmodule EOD.Client.PacketHandler do
   @doc """
   Disconnects the game client from the process
   """
-  def disconnect!(%Client{tcp_socket: socket}=client) do
+  def disconnect!(%Client{tcp_socket: socket} = client) do
     :ok = Socket.close(socket)
     client
   end
@@ -68,21 +68,21 @@ defmodule EOD.Client.PacketHandler do
   @doc """
   Updates the clients state flag and returns
   """
-  def change_state(%Client{}=client, state) do
-    %{ client | state: state }
+  def change_state(%Client{} = client, state) do
+    %{client | state: state}
   end
 
   @doc """
   Sets the account for a client
   """
-  def set_account(%Client{}=client, %EOD.Repo.Account{}=account) do
-    %{ client | account: account }
+  def set_account(%Client{} = client, %EOD.Repo.Account{} = account) do
+    %{client | account: account}
   end
 
   @doc """
   """
-  def select_realm(%Client{}=client, realm) when realm in @valid_realms do
-    %{ client | selected_realm: realm }
+  def select_realm(%Client{} = client, realm) when realm in @valid_realms do
+    %{client | selected_realm: realm}
   end
 
   @doc """
@@ -91,9 +91,9 @@ defmodule EOD.Client.PacketHandler do
   client as `{:ok, client}` or `{:error, error}`.  If the error happens to
   be no sessions available it returns `{:error, :too_many_players_logged_in}`
   """
-  def register_client_session(%Client{sessions: sessions}=client) do
+  def register_client_session(%Client{sessions: sessions} = client) do
     with {:ok, session_id} <- Client.SessionManager.register(sessions) do
-      {:ok, %{ client | session_id: session_id }}
+      {:ok, %{client | session_id: session_id}}
     else
       {:error, :no_session} -> {:error, :too_many_players_logged_in}
       any -> any

@@ -1,4 +1,9 @@
 defmodule EOD.Packet.Field do
+  @moduledoc """
+  This defines a field behaviour and is meant to be used by any module that
+  is intended to be a packet field.
+  """
+
   @callback struct_field_pair({any(), Keyword.t}) :: {atom(), any()} | nil
 
   @callback from_binary_match({any(), Keyword.t}) :: Macro.t | nil

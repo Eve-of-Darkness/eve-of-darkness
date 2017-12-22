@@ -1,4 +1,8 @@
 defmodule EOD.Packet.Field.Compound do
+  @moduledoc """
+  This packet field provides a way for a packet field to be broken down
+  and converted into other fields and vice-versa.
+  """
   use EOD.Packet.Field
 
   def struct_field_pair({{_name, _type}, opts}) do
