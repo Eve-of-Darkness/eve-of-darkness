@@ -5,7 +5,7 @@ defmodule EOD.PacketHandlerCase do
   what packet handler is being observed.
   """
   use ExUnit.CaseTemplate
-  alias EOD.{Client, TestSocket, Socket}
+  alias EOD.{Client, TestSocket, Socket, Server}
   alias EOD.Socket.TCP.ClientPacket
   import EOD.Repo.Factory
 
@@ -20,16 +20,21 @@ defmodule EOD.PacketHandlerCase do
 
   setup tags do
     setup_database_test_transactions(tags)
+    server_settings = tags[:server_settings] || Server.Settings.new
 
     {:ok, socket} = TestSocket.start_link
+    {:ok, server} = Server.start_link(conn_manager: :disabled, settings: server_settings)
+
     account = insert(:account)
 
     {:ok,
       client: %Client{session_id: tags[:session_id] || 7,
                       tcp_socket: socket,
+                      server: server,
                       account: account},
 
       account: account,
+      server: server,
       socket: TestSocket.set_role(socket, :client)}
   end
 
