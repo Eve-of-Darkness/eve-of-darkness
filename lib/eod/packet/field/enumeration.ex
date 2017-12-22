@@ -1,4 +1,8 @@
 defmodule EOD.Packet.Field.Enumeration do
+  @moduledoc """
+  This is a complex field type which allows you to map packet fields to
+  a different specific value that makes more sense.
+  """
   use EOD.Packet.Field
 
   def struct_field_pair({{name, type}, opts}) do
@@ -26,7 +30,7 @@ defmodule EOD.Packet.Field.Enumeration do
     processing = List.wrap(apply(type, :from_binary_process, [{name, opts}]))
     matches =
       enum_from_opts(opts)
-      |> Enum.map(fn {raw,val} ->
+      |> Enum.map(fn {raw, val} ->
         {:->, [], [[raw], val]}
       end)
 
@@ -46,7 +50,7 @@ defmodule EOD.Packet.Field.Enumeration do
     processing = List.wrap(apply(type, :to_binary_process, [{name, opts}]))
     matches =
       enum_from_opts(opts)
-      |> Enum.map(fn {raw,val} ->
+      |> Enum.map(fn {raw, val} ->
         {:->, [], [[val], raw]}
       end)
 

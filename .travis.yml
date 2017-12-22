@@ -9,3 +9,4 @@ script:
   - mix ecto.create
   - mix ecto.migrate
   - mix test
+  - mix credo -a

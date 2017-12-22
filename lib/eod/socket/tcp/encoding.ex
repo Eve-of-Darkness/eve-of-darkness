@@ -30,9 +30,9 @@ defmodule EOD.Socket.TCP.Encoding do
     code = apply(c_packet, :code, [])
     id = apply(c_packet, :packet_id, [])
 
-    def decode(%ClientPacket{id: unquote(code)}=packet) do
+    def decode(%ClientPacket{id: unquote(code)} = packet) do
       with {:ok, data} <- unquote(c_packet).from_binary(packet.data) do
-        {:ok, %{ packet | data: data, id: unquote(id)}}
+        {:ok, %{packet | data: data, id: unquote(id)}}
       end
     end
   end
@@ -60,7 +60,7 @@ defmodule EOD.Socket.TCP.Encoding do
   for s_packet <- @server_packets do
     code = apply(s_packet, :code, [])
 
-    def encode(% unquote(s_packet){}=packet) do
+    def encode(% unquote(s_packet){} = packet) do
       with {:ok, bin} <- unquote(s_packet).to_binary(packet) do
         {:ok, %ServerPacket{code: unquote(code), data: [bin]}}
       end

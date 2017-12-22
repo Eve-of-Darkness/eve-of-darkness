@@ -1,4 +1,9 @@
 defmodule EOD.Packet.Field.String do
+  @moduledoc """
+  A packet field for a standard string.  This isn't used much and great
+  care should be taken when using this. It needs to be an exact size
+  and relies on you to do any needed padding.
+  """
   use EOD.Packet.Field
   import EOD.Packet.OptSize
 

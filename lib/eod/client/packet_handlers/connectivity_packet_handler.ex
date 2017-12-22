@@ -16,7 +16,7 @@ defmodule EOD.Client.ConnectivityPacketHandler do
 
   # Override the default handle_packet/2 to send the whole packet
   # to ping_request/2, it needs the sequence from the packet
-  def handle_packet(client, %{id: :ping_request}=packet),
+  def handle_packet(client, %{id: :ping_request} = packet),
     do: ping_request(client, packet)
   def handle_packet(client, packet), do: super(client, packet)
 

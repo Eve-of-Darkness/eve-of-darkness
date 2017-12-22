@@ -1,4 +1,8 @@
 defmodule EOD.Repo.Account do
+  @moduledoc """
+  Data store for for an account, which ties a user to the characters they have
+  """
+
   use EOD.Repo.Schema
 
   schema "accounts" do
@@ -8,7 +12,7 @@ defmodule EOD.Repo.Account do
     timestamps()
   end
 
-  def changeset(%__MODULE__{}=struct, params \\ %{}) do
+  def changeset(%__MODULE__{} = struct, params \\ %{}) do
     struct
     |> cast(params, [:username, :password])
     |> validate_required([:username, :password])
@@ -32,7 +36,7 @@ defmodule EOD.Repo.Account do
     )
   end
 
-  defp hash_password(%Ecto.Changeset{changes: %{password: password}}=changeset) do
+  defp hash_password(%Ecto.Changeset{changes: %{password: password}} = changeset) do
     put_change(changeset, :password, Comeonin.Pbkdf2.hashpwsalt(password))
   end
   defp hash_password(changeset), do: changeset

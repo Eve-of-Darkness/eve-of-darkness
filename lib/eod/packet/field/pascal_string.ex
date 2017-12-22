@@ -1,4 +1,9 @@
 defmodule EOD.Packet.Field.PascalString do
+  @moduledoc """
+  Pascal string packet field.  This supports an option of `:type` which can be
+  either `:big` or `:little`, and defaults to `:big`.  The size of a pascal string
+  defines how big the header is for the string size.
+  """
   use EOD.Packet.Field
   import EOD.Packet.OptSize
 

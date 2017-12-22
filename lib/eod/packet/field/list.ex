@@ -1,4 +1,9 @@
 defmodule EOD.Packet.Field.List do
+  @moduledoc """
+  This is a complex field which allows you to define a list of similiar fields
+  under a single key.  In this case the size option declares how many of field
+  will be in the packet.
+  """
   use EOD.Packet.Field
 
   def struct_field_pair({{name, field}, opts}) do

@@ -1,4 +1,8 @@
 defmodule EOD.Repo.Character do
+  @moduledoc """
+  Data store schema for a character that can be played in the game
+  """
+
   use EOD.Repo.Schema
 
   @permitted ~w(realm name slot custom_mode eye_size lip_size eye_color

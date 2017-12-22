@@ -1,4 +1,7 @@
 defmodule EOD.Packet.Field.Blank do
+  @moduledoc """
+  Field to skip over unknown and unused parts of a packet
+  """
   use EOD.Packet.Field
   import EOD.Packet.OptSize
 

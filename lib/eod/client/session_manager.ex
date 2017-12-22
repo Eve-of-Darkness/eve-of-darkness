@@ -86,7 +86,7 @@ defmodule EOD.Client.SessionManager do
         amount = state.amount_free - 1
         Process.monitor(pid)
 
-        {:reply, {:ok, id}, %{ state |
+        {:reply, {:ok, id}, %{state |
           session_pool: session_pool,
           amount_free: amount,
           used: Map.put(state.used, pid, id)}}
@@ -102,7 +102,7 @@ defmodule EOD.Client.SessionManager do
         pool = :queue.in(id, state.session_pool)
         amount = state.amount_free + 1
         used = Map.delete(state.used, pid)
-        {:noreply, %{ state | session_pool: pool, amount_free: amount, used: used }}
+        {:noreply, %{state | session_pool: pool, amount_free: amount, used: used}}
     end
   end
 end

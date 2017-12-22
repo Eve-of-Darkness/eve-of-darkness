@@ -39,7 +39,7 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
     |> send_tcp(%Realm{realm: packet.realm})
     |> load_characters
     |> case do
-      %{selected_realm: :none}=client -> client
+      %{selected_realm: :none} = client -> client
 
       client ->
         client
@@ -72,7 +72,7 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
   as well as the `:action` hint to decide what characters to create or
   delete.
   """
-  def char_crud_request(client, packet=%{characters: [%{action: :create}|_]}) do
+  def char_crud_request(client, %{characters: [%{action: :create}|_]} = packet) do
     packet.characters
     |> Enum.with_index
     |> Enum.map(fn {char, index} -> Map.put(char, :slot, index) end)
@@ -90,7 +90,7 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
     |> load_characters
     |> send_tcp(&char_overview_msg(&1))
   end
-  def char_crud_request(client, packet=%{characters: [%{action: :delete}|_]}) do
+  def char_crud_request(client, %{characters: [%{action: :delete}|_]} = packet) do
     packet_characters =
       Enum.with_index(packet.characters)
       |> Enum.map(fn {char, index} -> Map.put(char, :slot, index) end)
@@ -110,17 +110,17 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
   # Private Methods
 
   defp set_selected_character(client, "noname") do
-    %{ client | selected_character: :none }
+    %{client | selected_character: :none}
   end
   defp set_selected_character(client, char_name) do
     character = Enum.find(client.characters, &(&1.name == char_name))
-    %{ client | selected_character: character || :none }
+    %{client | selected_character: character || :none}
   end
 
-  defp load_characters(%{select_realm: :none}=client) do
-    %{ client | characters: [] }
+  defp load_characters(%{select_realm: :none} = client) do
+    %{client | characters: []}
   end
-  defp load_characters(%{selected_realm: realm, account: account}=client) do
+  defp load_characters(%{selected_realm: realm, account: account} = client) do
     import Ecto.Query, only: [from: 2]
 
     characters =
@@ -129,7 +129,7 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
         order_by: [asc: :slot]
       ) |> EOD.Repo.all
 
-    %{ client | characters: characters }
+    %{client | characters: characters}
   end
 
   defp char_overview_msg(%{characters: chars, account: account}) do

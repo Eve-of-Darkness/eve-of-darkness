@@ -1,4 +1,8 @@
 defmodule EOD.Repo.RegionData do
+  @moduledoc """
+  This is the general information store for a region as well as helper
+  functions around the data.
+  """
   use EOD.Repo.Schema
 
   schema "regions" do

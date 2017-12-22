@@ -34,7 +34,7 @@ defmodule EOD.Socket.TCP.ClientPacket do
     {:ok, %__MODULE__{
       id: id, size: size, session_id: sess, parameter: param, sequence: seq, data: data, check: check}}
   end
-  def from_binary(<<size::16, _::bytes-size(8), remaining::binary>>=bin)
+  def from_binary(<<size::16, _::bytes-size(8), remaining::binary>> = bin)
   when size > byte_size(remaining) - 2 do
     {:partial, bin, size - byte_size(remaining) + 2}
   end

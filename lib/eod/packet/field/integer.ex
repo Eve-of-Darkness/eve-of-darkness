@@ -1,4 +1,7 @@
 defmodule EOD.Packet.Field.Integer do
+  @moduledoc """
+  Standard integer packet field, Size defaults to bytes.
+  """
   use EOD.Packet.Field
   import EOD.Packet.OptSize
 

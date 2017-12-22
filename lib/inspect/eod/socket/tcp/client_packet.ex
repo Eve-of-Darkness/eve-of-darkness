@@ -29,7 +29,7 @@ defimpl Inspect, for: EOD.Socket.TCP.ClientPacket do
 
   defp packet_id(id) when is_nil(id), do: "nil"
   defp packet_id(id) when is_atom(id), do: id
-  defp packet_id(id) when is_integer(id), do: "0x"<>hex(id)
+  defp packet_id(id) when is_integer(id), do: "0x" <> hex(id)
 
   defp hex(num) when is_integer(num), do: Base.encode16(<<num::8>>)
   defp hex(byte) when byte_size(byte) == 1, do: Base.encode16(byte)

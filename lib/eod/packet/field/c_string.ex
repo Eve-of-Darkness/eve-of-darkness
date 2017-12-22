@@ -1,4 +1,8 @@
 defmodule EOD.Packet.Field.CString do
+  @moduledoc """
+  A C style string, which is terminated with a zero byte.  For a given size
+  in bytes it will fill with empty bytes.
+  """
   use EOD.Packet.Field
   import EOD.Packet.OptSize
 
