@@ -4,10 +4,11 @@ defmodule EOD.Client.ConnectivityPacketHandlerTest do
   alias EOD.Packet.Client.{
     AcknowledgeSession,
     ClosingConnection,
-    PingRequest
+    PingRequest,
+    RegionRequest
   }
 
-  alias EOD.Packet.Server.PingReply
+  alias EOD.Packet.Server.{PingReply, RegionReply}
 
   setup _ do
     {:ok, handler: ConnectivityPacketHandler}
@@ -28,5 +29,35 @@ defmodule EOD.Client.ConnectivityPacketHandlerTest do
   test "closing_connection", context do
     handle_packet(context, %ClosingConnection{})
     assert disconnected?(context)
+  end
+
+  describe "region_request" do
+    setup context do
+      char = context[:character] || build(:character, region: 27)
+      region = build(:region_data, region_id: 27, name: "region027")
+
+      settings = %Server.Settings{
+        tcp_address: "192.168.1.111",
+        tcp_port: 45_123,
+        regions: [region]}
+
+      {:ok, server} = Server.start_link(conn_manager: :disabled, settings: settings)
+
+      {:ok,
+        client: %{context.client |
+          selected_character: char,
+          server: server},
+        server: server}
+    end
+
+    test "with a selected character it if returns a region reply", context do
+      handle_packet(context, %RegionRequest{})
+      reply = %RegionReply{} = received_packet(context)
+      assert reply.id == 27
+      assert reply.name == "region027" 
+      assert reply.port_1 == "45123"
+      assert reply.port_2 == "45123"
+      assert reply.ip_address == "192.168.1.111"
+    end
   end
 end

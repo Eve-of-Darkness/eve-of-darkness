@@ -6,12 +6,14 @@ defmodule EOD.Client.ConnectivityPacketHandler do
   """
 
   use EOD.Client.PacketHandler
-  alias EOD.Packet.Server.{PingReply}
+  alias EOD.Packet.Server.{PingReply, RegionReply}
+  alias EOD.Region
 
   handles_packets [
     EOD.Packet.Client.AcknowledgeSession,
     EOD.Packet.Client.ClosingConnection,
-    EOD.Packet.Client.PingRequest
+    EOD.Packet.Client.PingRequest,
+    EOD.Packet.Client.RegionRequest
   ]
 
   # Override the default handle_packet/2 to send the whole packet
@@ -44,4 +46,32 @@ defmodule EOD.Client.ConnectivityPacketHandler do
   connection
   """
   def closing_connection(client, _packet), do: client |> disconnect!
+
+  @doc """
+  """
+  def region_request(client, _packet) do
+    with \
+      {:ok, region} <- selected_character_region(client),
+      overview <- Region.get_overview(region)
+    do
+      client |> send_tcp(%RegionReply{
+        id: overview.region_id,
+        name: "#{overview.name}",
+        port_1: "#{overview.tcp_port}",
+        port_2: "#{overview.tcp_port}",
+        ip_address: "#{overview.ip_address}"
+      })
+    end
+
+    client
+  end
+
+  defp selected_character_region(%Client{selected_character: :none}) do
+    {:error, :no_region}
+  end
+  defp selected_character_region(%Client{selected_character: char} = client) do
+    client
+    |> region_manager
+    |> Region.Manager.get_region(char.region)
+  end
 end

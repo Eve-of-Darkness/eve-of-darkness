@@ -14,7 +14,7 @@ defmodule EOD.PacketHandlerCase do
       import Ecto.Query, only: [from: 2]
       import EOD.Repo.Factory
       import EOD.PacketHandlerCase
-      alias EOD.{Repo, Socket, Packet, Client}
+      alias EOD.{Repo, Socket, Packet, Client, Server}
     end
   end
 
