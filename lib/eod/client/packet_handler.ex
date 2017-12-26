@@ -20,6 +20,7 @@ defmodule EOD.Client.PacketHandler do
         set_account: 2,
         select_realm: 2,
         handles_packets: 1,
+        region_manager: 1
       ]
 
       def handle_packet(client, %{id: packet_id, data: data} = packet) do
@@ -83,6 +84,10 @@ defmodule EOD.Client.PacketHandler do
   """
   def select_realm(%Client{} = client, realm) when realm in @valid_realms do
     %{client | selected_realm: realm}
+  end
+
+  def region_manager(%Client{server: server}) do
+    EOD.Server.region_manager(server)
   end
 
   @doc """

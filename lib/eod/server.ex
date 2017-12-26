@@ -66,7 +66,7 @@ defmodule EOD.Server do
   def init(%__MODULE__{} = state) do
     with \
       {:ok, client_manager} <- Client.Manager.start_link(),
-      {:ok, region_manager} <- Region.Manager.start_link()
+      {:ok, region_manager} <- boot_region_manager(state)
     do
       send(self(), {:boot_conn_manager, state.ref})
       {:ok,
@@ -109,5 +109,14 @@ defmodule EOD.Server do
     [port: settings.tcp_port,
      callback: {:send, {:new_conn, ref}, self()},
      wrap: {Socket.TCP.GameSocket, :new, []}]
+  end
+
+  defp boot_region_manager(%{settings: settings}) do
+    opts = []
+      |> Keyword.put(:ip_address, settings.tcp_address)
+      |> Keyword.put(:tcp_port, settings.tcp_port)
+      |> Keyword.put(:regions, settings.regions)
+
+    Region.Manager.start_link(opts)
   end
 end

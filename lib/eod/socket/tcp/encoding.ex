@@ -18,6 +18,7 @@ defmodule EOD.Socket.TCP.Encoding do
     Client.HandShakeRequest,
     Client.LoginRequest,
     Client.PingRequest,
+    Client.RegionRequest,
   ]
 
   @doc """

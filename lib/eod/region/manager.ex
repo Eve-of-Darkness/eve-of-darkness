@@ -16,7 +16,9 @@ defmodule EOD.Region.Manager do
   def region_ids(pid), do: GenServer.call(pid, :region_ids)
 
   @doc """
-  Returns the region being managed via it's region_id
+  Returns the region being managed via it's region_id in the format
+  of `{:ok, pid}`.  If no region exists it will instead return the
+  tuple `{:error, :no_region}`
   """
   def get_region(pid, id) do
     GenServer.call(pid, {:get_region, id})
@@ -25,20 +27,21 @@ defmodule EOD.Region.Manager do
   # GenServer Callbacks
 
   def init(opts) do
+    region_opts = Keyword.take(opts, [:ip_address, :tcp_port])
     {:ok, supervisor} = start_region_supervisor()
 
     region_ids =
       for region_data <- opts[:regions] do
         Supervisor.start_child(
           supervisor,
-          [region_data, [name: tuple_name(region_data)]])
+          [region_data, [name: tuple_name(region_data)] ++ region_opts])
 
         region_data.region_id
       end
 
     {:ok,
       %__MODULE__{
-        region_supervisor: start_region_supervisor(),
+        region_supervisor: supervisor,
         region_ids: region_ids}}
   end
 
