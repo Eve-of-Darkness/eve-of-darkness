@@ -40,6 +40,18 @@ defmodule EOD.Repo.Character do
     field :piety, :integer
     field :empathy, :integer
     field :charisma, :integer
+
+    # Calculated Character Stats
+    field :max_hp, :integer
+    field :max_mana, :integer
+    field :max_endurance, :integer
+    field :max_concentration, :integer
+
+    field :current_hp, :integer
+    field :current_mana, :integer
+    field :current_endurance, :integer
+    field :current_concentration, :integer
+
     belongs_to :account, EOD.Repo.Account
     timestamps()
   end

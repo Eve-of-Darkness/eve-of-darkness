@@ -20,10 +20,19 @@ defmodule EOD.Client do
             state: :unknown,
             selected_realm: :none,
             selected_character: :none,
+            player: :none,
             characters: []
 
   def start_link(%__MODULE__{} = init_state) do
     GenServer.start_link(__MODULE__, init_state)
+  end
+
+  @doc """
+  Sends a message to the remote connected client.  The goal of this is to
+  abstract away how it's done, and to where.
+  """
+  def send_message(pid, message) do
+    GenServer.cast(pid, {:send_message, message})
   end
 
   @doc """
@@ -43,6 +52,11 @@ defmodule EOD.Client do
       |> Map.put(:client, self())
       |> Map.put(:ref, make_ref())
       |> begin_listener}
+  end
+
+  def handle_cast({:send_message, message}, state) do
+    state.tcp_socket |> EOD.Socket.send(message)
+    {:noreply, state}
   end
 
   def handle_call({:share_test_transaction, pid}, _, state) do
