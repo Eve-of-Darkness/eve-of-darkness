@@ -19,6 +19,11 @@ defmodule EOD.ClientTest do
       socket: TestSocket.set_role(socket, :client)}
   end
 
+  test "send_message/2", %{client: client, socket: socket} do
+    client |> Client.send_message(:rofltest)
+    assert {:ok, :rofltest} == Socket.recv(socket)
+  end
+
   describe "Login after handshake" do
     setup context do
       handshake_request = %ClientPacket{
