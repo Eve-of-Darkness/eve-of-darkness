@@ -8,9 +8,12 @@ defmodule EOD.Player do
 
   use GenServer
   alias EOD.Repo.Character
+  alias EOD.Client
   alias __MODULE__, as: Player
+  alias Player.{LivingStats}
 
   defstruct character: %Character{},
+            data: %{},
             client: nil
 
   def start_link(%Character{} = character, opts \\ []) do
@@ -19,5 +22,24 @@ defmodule EOD.Player do
       Player,
       %Player{character: character, client: client},
       opts)
+  end
+
+  # GenServer Callbacks
+
+  def init(state) do
+    {:ok, state} = LivingStats.init(state)
+
+    state
+    |> LivingStats.send_status_update
+    |> send_points_update()
+    # TODO Disabled skills appear to be sent as well
+
+    {:ok, state}
+  end
+
+  defp send_points_update(%{client: client} = state) do
+    # TODO This should send real info in the future
+    Client.send_message(client, %EOD.Packet.Server.CharacterPointsUpdate{})
+    state
   end
 end

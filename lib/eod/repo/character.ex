@@ -41,6 +41,8 @@ defmodule EOD.Repo.Character do
     field :empathy, :integer
     field :charisma, :integer
 
+    field :is_sitting?, :boolean, virtual: true, default: false
+
     # Calculated Character Stats
     field :max_hp, :integer
     field :max_mana, :integer
