@@ -347,6 +347,7 @@ defmodule EOD.Packet do
       :pascal_string -> EOD.Packet.Field.PascalString
       :c_string -> EOD.Packet.Field.CString
       :little_int -> EOD.Packet.Field.LittleInteger
+      :little_float -> EOD.Packet.Field.LittleFloat
       any -> any
     end
   end
