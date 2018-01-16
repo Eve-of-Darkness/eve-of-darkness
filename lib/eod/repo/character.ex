@@ -54,6 +54,11 @@ defmodule EOD.Repo.Character do
     field(:current_endurance, :integer)
     field(:current_concentration, :integer)
 
+    field(:x_loc, :float)
+    field(:y_loc, :float)
+    field(:z_loc, :float)
+    field(:heading, :integer)
+
     belongs_to(:account, EOD.Repo.Account)
     timestamps()
   end

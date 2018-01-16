@@ -20,17 +20,18 @@ defmodule EOD.Packet.Server.SelfLocationInformationTest do
   test "it can create a binary" do
     {:ok, bin} =
       %LocInfo{x_loc: 40.5, y_loc: 55.55, z_loc: 22.891, object_id: 42}
-      |> LocInfo.to_binary
+      |> LocInfo.to_binary()
 
-    assert bin == <<0, 0, 34, 66, 51, 51, 94, 66, 197, 32, 183, 65, 0, 42, 0, 0, 0, 0,
-                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>
+    assert bin ==
+             <<0, 0, 34, 66, 51, 51, 94, 66, 197, 32, 183, 65, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+               0, 0, 0, 0, 0>>
   end
 
   test "it can be created from a binary" do
     {:ok, info} =
-      <<0, 0, 34, 66, 51, 51, 94, 66, 197, 32, 183, 65, 0, 42, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>
-        |> LocInfo.from_binary
+      <<0, 0, 34, 66, 51, 51, 94, 66, 197, 32, 183, 65, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0>>
+      |> LocInfo.from_binary()
 
     assert_in_delta info.x_loc, 40.5, 0.001
     assert_in_delta info.y_loc, 55.55, 0.001
