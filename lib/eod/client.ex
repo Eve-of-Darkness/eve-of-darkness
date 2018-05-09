@@ -68,6 +68,7 @@ defmodule EOD.Client do
     require Client.LoginPacketHandler
     require Client.CharacterSelectPacketHandler
     require Client.ConnectivityPacketHandler
+    require Client.LoadPlayerPacketHandler
 
     updated =
       case packet.id do
@@ -79,6 +80,9 @@ defmodule EOD.Client do
 
         id when id in Client.CharacterSelectPacketHandler.handles() ->
           Client.CharacterSelectPacketHandler.handle_packet(state, packet)
+
+        id when id in Client.LoadPlayerPacketHandler.handles() ->
+          Client.LoadPlayerPacketHandler.handle_packet(state, packet)
 
         _ ->
           state

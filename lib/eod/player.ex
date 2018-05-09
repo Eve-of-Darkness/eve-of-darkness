@@ -10,7 +10,7 @@ defmodule EOD.Player do
   alias EOD.Repo.Character
   alias EOD.Client
   alias __MODULE__, as: Player
-  alias Player.{LivingStats}
+  alias Player.{LivingStats, Location}
 
   defstruct character: %Character{},
             data: %{},
@@ -26,21 +26,30 @@ defmodule EOD.Player do
     )
   end
 
+  def cast_with(pid, module, fun, args \\ []) do
+    GenServer.cast(pid, {:cast_with, module, fun, args})
+    pid
+  end
+
   # GenServer Callbacks
 
   def init(state) do
     {:ok, state} = LivingStats.init(state)
-
-    state
-    |> LivingStats.send_status_update()
-    |> send_points_update()
-
-    # TODO Disabled skills appear to be sent as well
-
+    {:ok, state} = Location.init(state)
     {:ok, state}
   end
 
-  defp send_points_update(%{client: client} = state) do
+  def handle_cast({:cast_with, module, fun, args}, state) do
+    case apply(module, fun, [state | args]) do
+      %Player{} = player ->
+        {:noreply, player}
+
+      {:ok, %Player{} = player} ->
+        {:noreply, player}
+    end
+  end
+
+  def send_points_update(%{client: client} = state) do
     # TODO This should send real info in the future
     Client.send_message(client, %EOD.Packet.Server.CharacterPointsUpdate{})
     state

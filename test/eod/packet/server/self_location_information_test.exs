@@ -23,8 +23,8 @@ defmodule EOD.Packet.Server.SelfLocationInformationTest do
       |> LocInfo.to_binary()
 
     assert bin ==
-             <<0, 0, 34, 66, 51, 51, 94, 66, 197, 32, 183, 65, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-               0, 0, 0, 0, 0>>
+             <<0, 0, 34, 66, 51, 51, 94, 66, 197, 32, 183, 65, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 128,
+               0, 0, 5, 0, 0>>
   end
 
   test "it can be created from a binary" do

@@ -1,6 +1,7 @@
-defmodule EOD.Player.LocationInformationTest do
+defmodule EOD.Player.LocationTest do
   use EOD.RepoCase, async: true
-  alias EOD.Player.LocationInformation, as: LocInfo
+  alias EOD.Player.Location, as: LocInfo
+  # alias EOD.Packet.Server.SelfLocationInformation, as: SelfLocInfo
   alias EOD.Player
 
   setup _ do
@@ -34,5 +35,9 @@ defmodule EOD.Player.LocationInformationTest do
       assert loc_info.region == 27
       assert loc_info.heading == 44
     end
+  end
+
+  describe "send_self_location/1" do
+    # TODO
   end
 end
