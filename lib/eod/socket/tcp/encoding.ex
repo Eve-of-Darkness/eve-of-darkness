@@ -10,16 +10,17 @@ defmodule EOD.Socket.TCP.Encoding do
 
   @client_packets [
     Client.AcknowledgeSession,
-    Client.ClosingConnection,
     Client.CharacterCrudRequest,
     Client.CharacterNameCheckRequest,
     Client.CharacterOverviewRequest,
     Client.CharacterSelectRequest,
+    Client.ClosingConnection,
     Client.GameOpenRequest,
     Client.HandShakeRequest,
     Client.LoginRequest,
     Client.PingRequest,
-    Client.RegionRequest
+    Client.RegionRequest,
+    Client.WorldInitRequest
   ]
 
   @doc """
@@ -48,12 +49,16 @@ defmodule EOD.Socket.TCP.Encoding do
     Server.AssignSession,
     Server.CharacterNameCheckReply,
     Server.CharacterOverviewResponse,
+    Server.CharacterPointsUpdate,
+    Server.CharacterStatusUpdate,
     Server.GameOpenReply,
     Server.HandshakeResponse,
     Server.LoginDenied,
     Server.LoginGranted,
     Server.PingReply,
-    Server.Realm
+    Server.Realm,
+    Server.RegionReply,
+    Server.SelfLocationInformation
   ]
 
   @doc """

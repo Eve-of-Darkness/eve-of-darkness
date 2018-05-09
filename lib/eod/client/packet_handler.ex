@@ -21,7 +21,8 @@ defmodule EOD.Client.PacketHandler do
           set_account: 2,
           select_realm: 2,
           handles_packets: 1,
-          region_manager: 1
+          region_manager: 1,
+          with_player: 2
         ]
 
       def handle_packet(client, %{id: packet_id, data: data} = packet) do
@@ -91,6 +92,17 @@ defmodule EOD.Client.PacketHandler do
 
   def region_manager(%Client{server: server}) do
     EOD.Server.region_manager(server)
+  end
+
+  @doc """
+  This is a convenience fucntion which direclty exposes the player pid
+  to a provided function and returns with the client state to be piped
+  to other functions.  Use this only if you don't intend to update the
+  orginal client state and only need a reference to the player pid.
+  """
+  def with_player(%Client{player: pid} = state, fun) do
+    fun.(pid)
+    state
   end
 
   @doc """

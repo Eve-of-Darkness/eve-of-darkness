@@ -23,12 +23,15 @@ defmodule EOD.Packet.Server.SelfLocationInformation do
     field(:region, :integer, size: [bytes: 2])
 
     # Not sure what this is, but it's normally 0, maybe this is
-    # where the diving flag went?
-    blank(using: 0x00, size: [bytes: 1])
+    # where the diving flag went? : Setting it to `0x80` for now
+    # as this is what I see for region 27 loading.
+    blank(using: 0x80, size: [bytes: 1])
 
     field(:server_name, :pascal_string, size: [bytes: 1])
 
     # Not sure what this is
-    blank(using: 0x00, size: [bytes: 4])
+    blank(using: 0x00, size: [bytes: 1])
+    blank(using: 0x05, size: [bytes: 1])
+    blank(using: 0x00, size: [bytes: 2])
   end
 end
