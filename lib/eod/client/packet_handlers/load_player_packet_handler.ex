@@ -27,7 +27,13 @@ defmodule EOD.Client.LoadPlayerPacketHandler do
   def world_init_request(%Client{} = client, _packet) do
     client
     |> with_player(fn player ->
-      player |> Player.cast_with(Player.Location, :send_self_location)
+      player
+      |> Player.cast_with(Player.Location, :send_self_location)
+      |> Player.cast_with(Player.Encumberance, :send)
+      |> Player.cast_with(Player.Speed, :send)
+      # Not a typo; send twice for some reason according to logs
+      |> Player.cast_with(Player.Speed, :send)
+      |> Player.cast_with(Player.LivingStats, :send_status_update)
     end)
   end
 

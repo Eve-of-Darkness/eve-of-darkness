@@ -10,7 +10,7 @@ defmodule EOD.Player do
   alias EOD.Repo.Character
   alias EOD.Client
   alias __MODULE__, as: Player
-  alias Player.{LivingStats, Location}
+  alias Player.{LivingStats, Location, Encumberance, Speed}
 
   defstruct character: %Character{},
             data: %{},
@@ -36,6 +36,8 @@ defmodule EOD.Player do
   def init(state) do
     {:ok, state} = LivingStats.init(state)
     {:ok, state} = Location.init(state)
+    {:ok, state} = Encumberance.init(state)
+    {:ok, state} = Speed.init(state)
     {:ok, state}
   end
 
