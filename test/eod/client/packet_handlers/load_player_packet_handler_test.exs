@@ -6,7 +6,9 @@ defmodule EOD.Client.LoadPlayerPacketHandlerTest do
     GameOpenReply,
     CharacterStatusUpdate,
     SelfLocationInformation,
-    CharacterPointsUpdate
+    CharacterPointsUpdate,
+    Encumberance,
+    PlayerSpeed
   }
 
   alias EOD.Packet.Client.{GameOpenRequest, WorldInitRequest}
@@ -45,6 +47,18 @@ defmodule EOD.Client.LoadPlayerPacketHandlerTest do
 
       assert_receive {:"$gen_cast", {:send_message, msg}}
       assert msg.__struct__ == SelfLocationInformation
+
+      assert_receive {:"$gen_cast", {:send_message, msg}}
+      assert msg.__struct__ == Encumberance
+
+      assert_receive {:"$gen_cast", {:send_message, msg}}
+      assert msg.__struct__ == PlayerSpeed
+
+      assert_receive {:"$gen_cast", {:send_message, msg}}
+      assert msg.__struct__ == PlayerSpeed
+
+      assert_receive {:"$gen_cast", {:send_message, msg}}
+      assert msg.__struct__ == CharacterStatusUpdate
     end
   end
 end

@@ -59,7 +59,14 @@ defmodule EOD.Repo.Character do
     field(:z_loc, :float)
     field(:heading, :integer)
 
+    field(:cloak_hood_up, :boolean)
+    field(:helmet_visible, :boolean)
+    field(:cloak_visible, :boolean)
+    field(:active_quiver_slot, :integer)
+    field(:active_weapon, :integer)
+
     belongs_to(:account, EOD.Repo.Account)
+    has_many(:inventory_slots, EOD.Repo.InventorySlot)
     timestamps()
   end
 
