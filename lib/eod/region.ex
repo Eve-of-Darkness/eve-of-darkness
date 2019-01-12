@@ -28,6 +28,10 @@ defmodule EOD.Region do
 
   # GenServer Callbacks
 
+  def init(args) do
+    {:ok, args}
+  end
+
   def handle_call(:region_id, _, state) do
     {:reply, state.data.region_id, state}
   end

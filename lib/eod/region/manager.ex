@@ -1,5 +1,7 @@
 defmodule EOD.Region.Manager do
   @moduledoc """
+  Responsible for holding the state of a region and orchestrating
+  messages to actors in it.
   """
   use GenServer
 

@@ -15,7 +15,7 @@ defmodule EOD.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :ecto, :postgrex],
+    [applications: [:logger, :ecto, :postgrex, :ecto_sql],
      mod: {EOD, []}]
   end
 
@@ -32,13 +32,14 @@ defmodule EOD.Mixfile do
   #
   # Type "mix help deps" for more examples and options
   defp deps do
-    [{:ecto, "~> 2.2.0"},
+    [{:ecto, "~> 3.0.0"},
+     {:ecto_sql, "~> 3.0.0"},
      {:postgrex, ">= 0.0.0"},
      {:comeonin, "~> 4.0"},
      {:pbkdf2_elixir, "~> 0.12"},
-   
+
      # Test Only Dependencies
-     {:ex_machina, "~> 2.1", only: :test},
+     {:ex_machina, "~> 2.2", only: :test},
      {:credo, "~> 0.8", only: [:dev, :test], runtime: false}]
   end
 end
