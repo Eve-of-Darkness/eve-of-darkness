@@ -11,9 +11,9 @@ defmodule EOD.Packet.Client.RegionRequest do
     * `EOD.Packet.Server.RegionReply`
   """
   use EOD.Packet do
-    code 0x9D
-    id :region_request
+    code(0x9D)
+    id(:region_request)
 
-    blank using: 0x00, size: [bytes: 30]
+    blank(using: 0x00, size: [bytes: 30])
   end
 end

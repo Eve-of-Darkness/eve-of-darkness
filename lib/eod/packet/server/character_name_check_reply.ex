@@ -9,10 +9,10 @@ defmodule EOD.Packet.Server.CharacterNameCheckReply do
     * `EOD.Packet.Client.CharacterNameCheckRequest`
   """
   use EOD.Packet do
-    code 0xCC
+    code(0xCC)
 
-    field :character_name, :c_string, size: [bytes: 30]
-    field :username, :c_string, size: [bytes: 24]
+    field(:character_name, :c_string, size: [bytes: 30])
+    field(:username, :c_string, size: [bytes: 24])
 
     enum :status, :integer, size: [bytes: 1], default: 0 do
       0 -> :valid
@@ -20,6 +20,6 @@ defmodule EOD.Packet.Server.CharacterNameCheckReply do
       2 -> :duplicate
     end
 
-    blank using: 0x00, size: [bytes: 3]
+    blank(using: 0x00, size: [bytes: 3])
   end
 end

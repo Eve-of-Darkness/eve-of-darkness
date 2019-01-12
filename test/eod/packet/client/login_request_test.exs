@@ -11,7 +11,7 @@ defmodule EOD.Packet.Client.LoginRequestTest do
   test "it can create a binary" do
     {:ok, bin} =
       %LoginRequest{username: "bigben", password: "roflcopters"}
-      |> LoginRequest.to_binary
+      |> LoginRequest.to_binary()
 
     assert bin == <<0::56, 6, 0, "bigben", 11, 0, "roflcopters">>
   end
@@ -19,13 +19,13 @@ defmodule EOD.Packet.Client.LoginRequestTest do
   test "it can read from a binary" do
     {:ok, req} =
       <<0::56, 6, 0, "bigben", 11, 0, "roflcopters">>
-      |> LoginRequest.from_binary
+      |> LoginRequest.from_binary()
 
     assert req.username == "bigben"
     assert req.password == "roflcopters"
   end
 
   test "it's size is anchored_dynamic" do
-    assert LoginRequest.packet_size == :anchored_dynamic
+    assert LoginRequest.packet_size() == :anchored_dynamic
   end
 end

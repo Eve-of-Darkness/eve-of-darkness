@@ -17,7 +17,8 @@ defmodule EOD.Region do
     GenServer.start_link(
       __MODULE__,
       %__MODULE__{data: data, ip_address: ip, tcp_port: port},
-      opts)
+      opts
+    )
   end
 
   def region_id(pid), do: GenServer.call(pid, :region_id)
@@ -41,11 +42,12 @@ defmodule EOD.Region do
   end
 
   def handle_call(:get_overview, _, state) do
-    oveview =
-      %{region_id: state.data.region_id,
-        name: state.data.name,
-        ip_address: state.ip_address,
-        tcp_port: state.tcp_port}
+    oveview = %{
+      region_id: state.data.region_id,
+      name: state.data.name,
+      ip_address: state.ip_address,
+      tcp_port: state.tcp_port
+    }
 
     {:reply, oveview, state}
   end

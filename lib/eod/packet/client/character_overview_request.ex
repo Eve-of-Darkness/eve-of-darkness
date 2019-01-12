@@ -7,12 +7,12 @@ defmodule EOD.Packet.Client.CharacterOverviewRequest do
   See:
   """
   use EOD.Packet do
-    code 0xFC
-    id :char_overview_request
+    code(0xFC)
+    id(:char_overview_request)
 
     compound :user_and_realm, :c_string, size: [bytes: 28] do
-      field :username, default: ""
-      field :realm, default: :none
+      field(:username, default: "")
+      field(:realm, default: :none)
     end
   end
 

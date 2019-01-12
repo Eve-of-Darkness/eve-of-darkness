@@ -15,46 +15,46 @@ defmodule EOD.Repo.Character do
   @name_format ~r/^[A-Z]{0,1}[a-z]{3,20}$/
 
   schema "characters" do
-    field :realm, :integer
-    field :name,  :string
-    field :slot, :integer
-    field :custom_mode, :integer
-    field :eye_size, :integer
-    field :lip_size, :integer
-    field :eye_color, :integer
-    field :hair_color, :integer
-    field :face_type, :integer
-    field :hair_style, :integer
-    field :mood_type, :integer
-    field :level, :integer
-    field :class, :integer
-    field :gender, :integer
-    field :race, :integer
-    field :model, :integer
-    field :region, :integer
-    field :strength, :integer
-    field :dexterity, :integer
-    field :constitution, :integer
-    field :quickness, :integer
-    field :intelligence, :integer
-    field :piety, :integer
-    field :empathy, :integer
-    field :charisma, :integer
+    field(:realm, :integer)
+    field(:name, :string)
+    field(:slot, :integer)
+    field(:custom_mode, :integer)
+    field(:eye_size, :integer)
+    field(:lip_size, :integer)
+    field(:eye_color, :integer)
+    field(:hair_color, :integer)
+    field(:face_type, :integer)
+    field(:hair_style, :integer)
+    field(:mood_type, :integer)
+    field(:level, :integer)
+    field(:class, :integer)
+    field(:gender, :integer)
+    field(:race, :integer)
+    field(:model, :integer)
+    field(:region, :integer)
+    field(:strength, :integer)
+    field(:dexterity, :integer)
+    field(:constitution, :integer)
+    field(:quickness, :integer)
+    field(:intelligence, :integer)
+    field(:piety, :integer)
+    field(:empathy, :integer)
+    field(:charisma, :integer)
 
-    field :is_sitting?, :boolean, virtual: true, default: false
+    field(:is_sitting?, :boolean, virtual: true, default: false)
 
     # Calculated Character Stats
-    field :max_hp, :integer
-    field :max_mana, :integer
-    field :max_endurance, :integer
-    field :max_concentration, :integer
+    field(:max_hp, :integer)
+    field(:max_mana, :integer)
+    field(:max_endurance, :integer)
+    field(:max_concentration, :integer)
 
-    field :current_hp, :integer
-    field :current_mana, :integer
-    field :current_endurance, :integer
-    field :current_concentration, :integer
+    field(:current_hp, :integer)
+    field(:current_mana, :integer)
+    field(:current_endurance, :integer)
+    field(:current_concentration, :integer)
 
-    belongs_to :account, EOD.Repo.Account
+    belongs_to(:account, EOD.Repo.Account)
     timestamps()
   end
 
@@ -84,12 +84,13 @@ defmodule EOD.Repo.Character do
   end
 
   def for_realm(query \\ __MODULE__, realm) when is_atom(realm) do
-    realm_num = case realm do
-      :albion -> 1
-      :midgard -> 2
-      :hibernia -> 3
-      _ -> 0
-    end
+    realm_num =
+      case realm do
+        :albion -> 1
+        :midgard -> 2
+        :hibernia -> 3
+        _ -> 0
+      end
 
     from(
       c in query,
@@ -99,7 +100,7 @@ defmodule EOD.Repo.Character do
 
   def name_taken?(query \\ __MODULE__, name) when is_binary(name) do
     from(find_by_name(query, name), select: [:id])
-    |> EOD.Repo.one
+    |> EOD.Repo.one()
     |> case do
       nil -> false
       _ -> true
@@ -112,5 +113,6 @@ defmodule EOD.Repo.Character do
       [_] -> false
     end
   end
+
   def invalid_name?(_), do: true
 end

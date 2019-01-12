@@ -7,7 +7,7 @@ defmodule EOD.Socket.TCP.ServerPacketTest do
   end
 
   setup tags do
-    {:ok, p: new(tags[:code] || 0x00) }
+    {:ok, p: new(tags[:code] || 0x00)}
   end
 
   describe "write_byte/2" do
@@ -18,8 +18,7 @@ defmodule EOD.Socket.TCP.ServerPacketTest do
 
     test "writing bytes", %{p: pak} do
       assert [255] == pak |> write_byte(<<255::8>>) |> data_flattened
-      assert [191, 38] ==
-        pak |> write_byte(<<191::8>>) |> write_byte(<<38::8>>) |> data_flattened
+      assert [191, 38] == pak |> write_byte(<<191::8>>) |> write_byte(<<38::8>>) |> data_flattened
     end
   end
 
@@ -29,8 +28,7 @@ defmodule EOD.Socket.TCP.ServerPacketTest do
     end
 
     test "several strings", %{p: pak} do
-      assert ~w(one two) ==
-        pak |> write_string("one") |> write_string("two") |> data_flattened
+      assert ~w(one two) == pak |> write_string("one") |> write_string("two") |> data_flattened
     end
   end
 
@@ -45,7 +43,7 @@ defmodule EOD.Socket.TCP.ServerPacketTest do
 
     test "writing several strings", %{p: pak} do
       assert ~w(te st) ==
-        pak |> write_string("test", 2) |> write_string("start", 2) |> data_flattened
+               pak |> write_string("test", 2) |> write_string("start", 2) |> data_flattened
     end
   end
 
@@ -71,8 +69,9 @@ defmodule EOD.Socket.TCP.ServerPacketTest do
   describe "write_16/2" do
     test "an integer is packed as two bytes", %{p: pak} do
       assert [<<41::16>>] == pak |> write_16(41) |> data_flattened
+
       assert [<<160, 40>>, <<41::16>>] ==
-        pak |> write_16(41_000) |> write_16(41) |> data_flattened
+               pak |> write_16(41_000) |> write_16(41) |> data_flattened
     end
 
     test "two bytes are added", %{p: pak} do
@@ -87,13 +86,13 @@ defmodule EOD.Socket.TCP.ServerPacketTest do
 
     test "four bytes are appended", %{p: pak} do
       assert [<<0, 0, 0, 0>>, <<1, 1, 1, 1>>] =
-        pak |> write_32(0) |> write_32(<<1, 1, 1, 1>>) |> data_flattened
+               pak |> write_32(0) |> write_32(<<1, 1, 1, 1>>) |> data_flattened
     end
   end
 
   describe "write_pascal_string/2" do
     test "the size is the first part", %{p: pak} do
-      assert [4,_] = pak |> write_pascal_string("test") |> data_flattened
+      assert [4, _] = pak |> write_pascal_string("test") |> data_flattened
     end
 
     test "the string is the next segment", %{p: pak} do
@@ -103,11 +102,11 @@ defmodule EOD.Socket.TCP.ServerPacketTest do
 
   describe "fill_bytes/3" do
     test "0 is a no-op", %{p: pak} do
-      assert [] == pak |> fill_bytes(0xf1, 0) |> data_flattened
+      assert [] == pak |> fill_bytes(0xF1, 0) |> data_flattened
     end
 
     test "writing just 1", %{p: pak} do
-      assert [0xf1] == pak |> fill_bytes(0xf1, 1) |> data_flattened
+      assert [0xF1] == pak |> fill_bytes(0xF1, 1) |> data_flattened
     end
 
     test "writing several", %{p: pak} do
@@ -135,8 +134,7 @@ defmodule EOD.Socket.TCP.ServerPacketTest do
     end
 
     test "under length", %{p: pak} do
-      assert ["test", 0, 0] ==
-        pak |> write_fill_string("test", 6) |> data_flattened
+      assert ["test", 0, 0] == pak |> write_fill_string("test", 6) |> data_flattened
     end
   end
 end

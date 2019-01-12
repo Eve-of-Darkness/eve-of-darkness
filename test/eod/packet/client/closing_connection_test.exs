@@ -10,13 +10,13 @@ defmodule EOD.Packet.Client.ClosingConnectionTest do
   test "it can create a binary" do
     {:ok, bin} =
       %ClosingConnection{reason: 4}
-      |> ClosingConnection.to_binary
+      |> ClosingConnection.to_binary()
 
     assert bin == <<4>>
   end
 
   test "it can create a struct from a binary" do
-    {:ok, msg} = <<5>> |> ClosingConnection.from_binary
+    {:ok, msg} = <<5>> |> ClosingConnection.from_binary()
     assert msg == %ClosingConnection{reason: 5}
   end
 end

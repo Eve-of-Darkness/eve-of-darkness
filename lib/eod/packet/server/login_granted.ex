@@ -10,20 +10,20 @@ defmodule EOD.Packet.Server.LoginGranted do
     * `EOD.Packet.Client.LoginRequest`
   """
   use EOD.Packet do
-    code 0x2A
+    code(0x2A)
 
-    field :username,    :pascal_string, size: [bytes: 1]
-    field :server_name, :pascal_string, size: [bytes: 1]
-    field :server_id,   :integer,       size: [bytes: 1], default: 5
+    field(:username, :pascal_string, size: [bytes: 1])
+    field(:server_name, :pascal_string, size: [bytes: 1])
+    field(:server_id, :integer, size: [bytes: 1], default: 5)
 
     # TODO: values are best guess, need testing and verification
-    enum  :client_coloring, :integer,   size: [bytes: 1], default: 7 do
+    enum :client_coloring, :integer, size: [bytes: 1], default: 7 do
       0 -> :standard
       1 -> :standard_pvp
       3 -> :standard_pve
       7 -> :standard_all_realm
     end
 
-    blank                using: 0x00,   size: [bytes: 2]
+    blank(using: 0x00, size: [bytes: 2])
   end
 end

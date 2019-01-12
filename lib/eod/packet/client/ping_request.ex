@@ -8,11 +8,11 @@ defmodule EOD.Packet.Client.PingRequest do
     * `EOD.Packet.Server.PingReply`
   """
   use EOD.Packet do
-    code 0xA3
-    id :ping_request
+    code(0xA3)
+    id(:ping_request)
 
-    blank using: 0x00, size: [bytes: 4]
-    field :timestamp, :integer, size: [bytes: 4]
-    blank using: 0x00, size: [bytes: 4]
+    blank(using: 0x00, size: [bytes: 4])
+    field(:timestamp, :integer, size: [bytes: 4])
+    blank(using: 0x00, size: [bytes: 4])
   end
 end

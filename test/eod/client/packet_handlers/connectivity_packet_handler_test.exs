@@ -1,6 +1,7 @@
 defmodule EOD.Client.ConnectivityPacketHandlerTest do
   use EOD.PacketHandlerCase, async: true
   alias EOD.Client.ConnectivityPacketHandler
+
   alias EOD.Packet.Client.{
     AcknowledgeSession,
     ClosingConnection,
@@ -39,22 +40,19 @@ defmodule EOD.Client.ConnectivityPacketHandlerTest do
       settings = %Server.Settings{
         tcp_address: "192.168.1.111",
         tcp_port: 45_123,
-        regions: [region]}
+        regions: [region]
+      }
 
       {:ok, server} = Server.start_link(conn_manager: :disabled, settings: settings)
 
-      {:ok,
-        client: %{context.client |
-          selected_character: char,
-          server: server},
-        server: server}
+      {:ok, client: %{context.client | selected_character: char, server: server}, server: server}
     end
 
     test "with a selected character it if returns a region reply", context do
       handle_packet(context, %RegionRequest{})
       reply = %RegionReply{} = received_packet(context)
       assert reply.id == 27
-      assert reply.name == "region027" 
+      assert reply.name == "region027"
       assert reply.port_1 == "45123"
       assert reply.port_2 == "45123"
       assert reply.ip_address == "192.168.1.111"

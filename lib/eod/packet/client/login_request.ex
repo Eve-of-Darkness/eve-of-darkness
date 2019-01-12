@@ -10,11 +10,11 @@ defmodule EOD.Packet.Client.LoginRequest do
     * `EOD.Packet.Server.HandShakeResponse`
   """
   use EOD.Packet do
-    code 0xA7
-    id :login_request
+    code(0xA7)
+    id(:login_request)
 
-    blank using: 0x00, size: [bytes: 7]
-    field :username, :pascal_string, type: :little, size: 2
-    field :password, :pascal_string, type: :little, size: 2
+    blank(using: 0x00, size: [bytes: 7])
+    field(:username, :pascal_string, type: :little, size: 2)
+    field(:password, :pascal_string, type: :little, size: 2)
   end
 end

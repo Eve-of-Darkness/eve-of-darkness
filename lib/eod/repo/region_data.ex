@@ -6,10 +6,10 @@ defmodule EOD.Repo.RegionData do
   use EOD.Repo.Schema
 
   schema "regions" do
-    field :region_id,    :integer
-    field :name,         :string
-    field :description,  :string
-    field :enabled,      :boolean
+    field(:region_id, :integer)
+    field(:name, :string)
+    field(:description, :string)
+    field(:enabled, :boolean)
   end
 
   @doc """

@@ -19,7 +19,7 @@ defmodule EOD.Socket.TCP.Encoding do
     Client.HandShakeRequest,
     Client.LoginRequest,
     Client.PingRequest,
-    Client.RegionRequest,
+    Client.RegionRequest
   ]
 
   @doc """
@@ -38,8 +38,9 @@ defmodule EOD.Socket.TCP.Encoding do
       end
     end
   end
+
   def decode(packet) do
-    Logger.warn "Unknown TCP Packet: #{inspect packet}"
+    Logger.warn("Unknown TCP Packet: #{inspect(packet)}")
     {:error, :unknown_tcp_packet}
   end
 
@@ -63,14 +64,15 @@ defmodule EOD.Socket.TCP.Encoding do
   for s_packet <- @server_packets do
     code = apply(s_packet, :code, [])
 
-    def encode(% unquote(s_packet){} = packet) do
+    def encode(%unquote(s_packet){} = packet) do
       with {:ok, bin} <- unquote(s_packet).to_binary(packet) do
         {:ok, %ServerPacket{code: unquote(code), data: [bin]}}
       end
     end
   end
+
   def encode(packet) do
-    Logger.warn "Unknown Message to encode for TCP: #{inspect packet}"
+    Logger.warn("Unknown Message to encode for TCP: #{inspect(packet)}")
     {:error, :unknown_tcp_message}
   end
 end

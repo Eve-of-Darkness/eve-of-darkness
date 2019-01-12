@@ -4,8 +4,8 @@ defmodule EOD.Repo.CharacterTest do
 
   test "#find_by_name" do
     insert(:character, name: "Bigben")
-    assert Character.name_taken? "bigben"
-    refute Character.name_taken? "thewhat"
+    assert Character.name_taken?("bigben")
+    refute Character.name_taken?("thewhat")
   end
 
   describe "#for_realm" do
@@ -13,13 +13,15 @@ defmodule EOD.Repo.CharacterTest do
       alb = insert(:character, name: "benfalk", realm: 1)
       mid = insert(:character, name: "ryno", realm: 2)
       hib = insert(:character, name: "lucas", realm: 3)
+
       {:ok,
-        result: Character.for_realm(tags[:realm])
-                |> Repo.all
-                |> Enum.map(& &1.id),
-        alb: alb,
-        mid: mid,
-        hib: hib}
+       result:
+         Character.for_realm(tags[:realm])
+         |> Repo.all()
+         |> Enum.map(& &1.id),
+       alb: alb,
+       mid: mid,
+       hib: hib}
     end
 
     @tag realm: :albion
@@ -45,7 +47,7 @@ defmodule EOD.Repo.CharacterTest do
 
     @tag realm: :none
     test ":none finds nothing", context do
-      assert context.result |> Enum.count == 0
+      assert context.result |> Enum.count() == 0
     end
   end
 
@@ -55,15 +57,17 @@ defmodule EOD.Repo.CharacterTest do
     refute invalid_name?("ted")
     assert invalid_name?("ted and bill")
     assert invalid_name?("areallybignamethatgoesovertwenty")
-    assert invalid_name?("snowman"<> <<0xE2, 0x98, 0x83>>)
+    assert invalid_name?("snowman" <> <<0xE2, 0x98, 0x83>>)
   end
 
   test "#for_account" do
     alb = insert(:character, name: "benfalk", realm: 1)
     mid = insert(:character, name: "ryno", realm: 2)
-    result = Character.for_account(alb.account)
-             |> Repo.all
-             |> Enum.map(& &1.id)
+
+    result =
+      Character.for_account(alb.account)
+      |> Repo.all()
+      |> Enum.map(& &1.id)
 
     assert alb.id in result
     refute mid.id in result

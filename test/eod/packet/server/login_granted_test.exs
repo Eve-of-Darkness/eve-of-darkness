@@ -12,9 +12,13 @@ defmodule EOD.Packet.Server.LoginGrantedTest do
 
   test "it can generate a binary" do
     {:ok, bin} =
-      %LoginGranted{ username: "ben", server_name: "EOD",
-                     server_id: 9, client_coloring: :standard_pvp }
-      |> LoginGranted.to_binary
+      %LoginGranted{
+        username: "ben",
+        server_name: "EOD",
+        server_id: 9,
+        client_coloring: :standard_pvp
+      }
+      |> LoginGranted.to_binary()
 
     assert bin == <<3, "ben", 3, "EOD", 9, 1, 0, 0>>
   end
@@ -22,7 +26,7 @@ defmodule EOD.Packet.Server.LoginGrantedTest do
   test "it can generate from a binary" do
     {:ok, req} =
       <<6, "donald", 8, "darkness", 66, 3, 0, 0>>
-      |> LoginGranted.from_binary
+      |> LoginGranted.from_binary()
 
     assert req.username == "donald"
     assert req.server_name == "darkness"

@@ -25,8 +25,9 @@ defmodule EOD.Packet.Field.List do
 
       size ->
         bytes = div(size, 8)
+
         quote do
-          unquote(Macro.var(name, nil)) :: bytes-size(unquote(bytes))
+          unquote(Macro.var(name, nil)) :: bytes - size(unquote(bytes))
         end
     end
   end
@@ -42,30 +43,36 @@ defmodule EOD.Packet.Field.List do
       size when is_integer(size) ->
         quote do
           unquote(Macro.var(name, nil)) =
-            Enum.reduce(1 .. unquote(size), {[], unquote(Macro.var(name, nil))}, fn _, {col, bin} ->
+            Enum.reduce(1..unquote(size), {[], unquote(Macro.var(name, nil))}, fn _, {col, bin} ->
               {:ok, item, rem} = apply(unquote(field), :from_binary_substructure, [bin])
-              {[item|col], rem}
+              {[item | col], rem}
             end)
             |> elem(0)
-            |> Enum.reverse
+            |> Enum.reverse()
         end
 
       :dynamic ->
         quote do
           unquote(Macro.var(name, nil)) =
-            EOD.Packet.Field.List.dynamic_list_match(unquote(Macro.var(name, nil)), unquote(field), [])
+            EOD.Packet.Field.List.dynamic_list_match(
+              unquote(Macro.var(name, nil)),
+              unquote(field),
+              []
+            )
         end
     end
   end
 
   def size({{_name, field}, opts}) do
     case Keyword.fetch!(opts, :size) do
-      :dynamic -> :dynamic
+      :dynamic ->
+        :dynamic
 
       size when is_integer(size) ->
         case apply(field, :packet_size, []) do
           int when is_integer(int) ->
             size * int * 8
+
           _ ->
             :dynamic
         end
@@ -77,7 +84,7 @@ defmodule EOD.Packet.Field.List do
   def to_binary_bin(pairs), do: from_binary_match(pairs)
 
   def to_binary_process({{name, field}, _opts}) do
-    #TODO enforce size to binary ?
+    # TODO enforce size to binary ?
     quote do
       unquote(Macro.var(name, nil)) =
         Enum.reduce(unquote(Macro.var(name, nil)), "", fn struct, bin ->
@@ -87,9 +94,10 @@ defmodule EOD.Packet.Field.List do
     end
   end
 
-  def dynamic_list_match("", _, list), do: list |> Enum.reverse
+  def dynamic_list_match("", _, list), do: list |> Enum.reverse()
+
   def dynamic_list_match(bin, field, list) do
     {:ok, item, rem} = apply(field, :from_binary_substructure, [bin])
-    dynamic_list_match(rem, field, [item|list])
+    dynamic_list_match(rem, field, [item | list])
   end
 end

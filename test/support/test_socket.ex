@@ -11,15 +11,15 @@ defmodule EOD.TestSocket do
   use GenServer
 
   defmodule State do
-    defstruct server_outbox: :queue.new,
-              client_outbox: :queue.new,
-              waiting_clients: :queue.new,
-              waiting_servers: :queue.new,
+    defstruct server_outbox: :queue.new(),
+              client_outbox: :queue.new(),
+              waiting_clients: :queue.new(),
+              waiting_servers: :queue.new(),
               state: :open,
               ref: nil
   end
 
-  @empty :queue.new
+  @empty :queue.new()
 
   @doc """
   Returns a fresh `TestSocket` that can be used with `EOD.Socket`.  It is
@@ -71,8 +71,8 @@ defmodule EOD.TestSocket do
   @doc """
   Returns an updated socket with the role set, may be either `:server` or `:client`
   """
-  def set_role(socket=%__MODULE__{}=socket, role) when role in [:server, :client] do
-    %{ socket | role: role }
+  def set_role(socket = %__MODULE__{} = socket, role) when role in [:server, :client] do
+    %{socket | role: role}
   end
 
   @doc """
@@ -93,7 +93,7 @@ defmodule EOD.TestSocket do
     {:ok, args}
   end
 
-  def handle_info({:shutdown, ref}, %{ref: ref}=state) do
+  def handle_info({:shutdown, ref}, %{ref: ref} = state) do
     {:stop, :normal, state}
   end
 
@@ -103,58 +103,58 @@ defmodule EOD.TestSocket do
 
   def handle_call(:close, _, state) do
     :queue.join(state.waiting_clients, state.waiting_servers)
-    |> :queue.to_list
+    |> :queue.to_list()
     |> Enum.each(&GenServer.reply(&1, {:error, :closed}))
 
     {:ok, _} = :timer.send_after(100, {:shutdown, state.ref})
 
-    {:reply, :ok, %{ state | waiting_clients: @empty, waiting_servers: @empty, state: :closed }}
+    {:reply, :ok, %{state | waiting_clients: @empty, waiting_servers: @empty, state: :closed}}
   end
 
-  def handle_call({action, _}, _, %{state: :closed}=state) when action in [:send, :get] do
+  def handle_call({action, _}, _, %{state: :closed} = state) when action in [:send, :get] do
     {:reply, {:error, :closed}, state}
   end
 
-  def handle_call({:get, :server}, from, %{client_outbox: @empty}=state) do
+  def handle_call({:get, :server}, from, %{client_outbox: @empty} = state) do
     waiting = :queue.in(from, state.waiting_servers)
-    {:noreply, %{ state | waiting_servers: waiting }}
+    {:noreply, %{state | waiting_servers: waiting}}
   end
 
-  def handle_call({:get, :client}, from, %{server_outbox: @empty}=state) do
+  def handle_call({:get, :client}, from, %{server_outbox: @empty} = state) do
     waiting = :queue.in(from, state.waiting_clients)
-    {:noreply, %{ state | waiting_clients: waiting }}
+    {:noreply, %{state | waiting_clients: waiting}}
   end
 
-  def handle_call({:get, :server}, _, %{client_outbox: outbox}=state) do
+  def handle_call({:get, :server}, _, %{client_outbox: outbox} = state) do
     {{:value, msg}, updated_outbox} = :queue.out(outbox)
-    {:reply, msg, %{ state | client_outbox: updated_outbox }}
+    {:reply, msg, %{state | client_outbox: updated_outbox}}
   end
 
-  def handle_call({:get, :client}, _, %{server_outbox: outbox}=state) do
+  def handle_call({:get, :client}, _, %{server_outbox: outbox} = state) do
     {{:value, msg}, updated_outbox} = :queue.out(outbox)
-    {:reply, msg, %{ state | server_outbox: updated_outbox }}
+    {:reply, msg, %{state | server_outbox: updated_outbox}}
   end
 
-  def handle_call({:send, :server, msg}, _, %{waiting_clients: @empty}=state) do
+  def handle_call({:send, :server, msg}, _, %{waiting_clients: @empty} = state) do
     messages = :queue.in(msg, state.server_outbox)
-    {:reply, :ok, %{ state | server_outbox: messages }}
+    {:reply, :ok, %{state | server_outbox: messages}}
   end
 
-  def handle_call({:send, :client, msg}, _, %{waiting_servers: @empty}=state) do
+  def handle_call({:send, :client, msg}, _, %{waiting_servers: @empty} = state) do
     messages = :queue.in(msg, state.client_outbox)
-    {:reply, :ok, %{ state | client_outbox: messages }}
+    {:reply, :ok, %{state | client_outbox: messages}}
   end
 
-  def handle_call({:send, :server, msg}, _, %{waiting_clients: clients}=state) do
+  def handle_call({:send, :server, msg}, _, %{waiting_clients: clients} = state) do
     {{:value, client}, remaining_clients} = :queue.out(clients)
     GenServer.reply(client, msg)
-    {:reply, :ok, %{ state | waiting_clients: remaining_clients }}
+    {:reply, :ok, %{state | waiting_clients: remaining_clients}}
   end
 
-  def handle_call({:send, :client, msg}, _, %{waiting_servers: servers}=state) do
+  def handle_call({:send, :client, msg}, _, %{waiting_servers: servers} = state) do
     {{:value, server}, remaining_servers} = :queue.out(servers)
     GenServer.reply(server, msg)
-    {:reply, :ok, %{ state | waiting_servers: remaining_servers }}
+    {:reply, :ok, %{state | waiting_servers: remaining_servers}}
   end
 end
 

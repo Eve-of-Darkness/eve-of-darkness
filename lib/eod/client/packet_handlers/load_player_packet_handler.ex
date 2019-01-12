@@ -8,9 +8,9 @@ defmodule EOD.Client.LoadPlayerPacketHandler do
 
   use Client.PacketHandler
 
-  handles_packets [
+  handles_packets([
     EOD.Packet.Client.GameOpenRequest
-  ]
+  ])
 
   def game_open_request(%Client{} = client, _packet) do
     client

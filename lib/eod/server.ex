@@ -39,11 +39,12 @@ defmodule EOD.Server do
     ref = opts[:ref] || make_ref()
     conn_manager = opts[:conn_manager]
 
-    settings = Keyword.get_lazy(opts, :settings, fn -> Settings.new end)
+    settings = Keyword.get_lazy(opts, :settings, fn -> Settings.new() end)
 
     GenServer.start_link(
       __MODULE__,
-      %__MODULE__{ref: ref, settings: settings, conn_manager: conn_manager})
+      %__MODULE__{ref: ref, settings: settings, conn_manager: conn_manager}
+    )
   end
 
   @doc """
@@ -64,15 +65,10 @@ defmodule EOD.Server do
   # GenServer Callbacks
 
   def init(%__MODULE__{} = state) do
-    with \
-      {:ok, client_manager} <- Client.Manager.start_link(),
-      {:ok, region_manager} <- boot_region_manager(state)
-    do
+    with {:ok, client_manager} <- Client.Manager.start_link(),
+         {:ok, region_manager} <- boot_region_manager(state) do
       send(self(), {:boot_conn_manager, state.ref})
-      {:ok,
-        %{state |
-          client_manager: client_manager,
-          region_manager: region_manager}}
+      {:ok, %{state | client_manager: client_manager, region_manager: region_manager}}
     end
   end
 
@@ -106,13 +102,16 @@ defmodule EOD.Server do
   # Private Functions
 
   defp conn_manager_opts(%{ref: ref, settings: settings}) do
-    [port: settings.tcp_port,
-     callback: {:send, {:new_conn, ref}, self()},
-     wrap: {Socket.TCP.GameSocket, :new, []}]
+    [
+      port: settings.tcp_port,
+      callback: {:send, {:new_conn, ref}, self()},
+      wrap: {Socket.TCP.GameSocket, :new, []}
+    ]
   end
 
   defp boot_region_manager(%{settings: settings}) do
-    opts = []
+    opts =
+      []
       |> Keyword.put(:ip_address, settings.tcp_address)
       |> Keyword.put(:tcp_port, settings.tcp_port)
       |> Keyword.put(:regions, settings.regions)

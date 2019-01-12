@@ -8,7 +8,7 @@ defmodule EOD.Server.ConnManagerTest do
   end
 
   test "starts up fine..." do
-    assert {:ok, pid} = CM.start_link
+    assert {:ok, pid} = CM.start_link()
     assert is_pid(pid)
     assert Process.alive?(pid)
     CM.stop(pid)

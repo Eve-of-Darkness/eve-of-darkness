@@ -19,9 +19,10 @@ defmodule EOD.Socket.Listener do
   def start_link(socket, opts \\ []) do
     receiver = Keyword.get(opts, :receiver, self())
     wrap = Keyword.get(opts, :wrap, :packet)
-    spawn_link fn ->
+
+    spawn_link(fn ->
       listen(%__MODULE__{socket: socket, receiver: receiver, wrap: wrap})
-    end
+    end)
   end
 
   defp listen(state) do

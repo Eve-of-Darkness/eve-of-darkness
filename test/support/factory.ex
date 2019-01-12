@@ -36,17 +36,14 @@ defmodule EOD.Repo.Factory do
       piety: 70,
       empathy: 60,
       charisma: 60,
-
       max_hp: 100,
       max_mana: 100,
       max_endurance: 100,
       max_concentration: 20,
-
       current_hp: 100,
       current_mana: 100,
       current_endurance: 100,
       current_concentration: 20,
-
       account: build(:account)
     }
   end

@@ -11,7 +11,7 @@ defmodule EOD.Packet.Client.CharacterOverviewRequestTest do
   test "it can convert to binary" do
     {:ok, bin} =
       %CharacterOverviewRequest{username: "ben", realm: :albion}
-      |> CharacterOverviewRequest.to_binary
+      |> CharacterOverviewRequest.to_binary()
 
     assert bin == String.pad_trailing("ben-S", 28, <<0>>)
   end
@@ -19,7 +19,7 @@ defmodule EOD.Packet.Client.CharacterOverviewRequestTest do
   test "it can convert from a binary" do
     {:ok, req} =
       String.pad_trailing("ben-S", 28, <<0>>)
-      |> CharacterOverviewRequest.from_binary
+      |> CharacterOverviewRequest.from_binary()
 
     assert req.username == "ben"
     assert req.realm == :albion

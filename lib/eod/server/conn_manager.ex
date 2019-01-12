@@ -34,11 +34,11 @@ defmodule EOD.Server.ConnManager do
     with {:ok, port} <- opts |> Keyword.get(:port, 10_300) |> parse_port,
          {:ok, clbk} <- opts |> Keyword.get(:callback, def_clbk()) |> check_callback,
          {:ok, wrap} <- opts |> Keyword.get(:wrap, :none) |> check_wrap,
-         {:ok, sock} <- :gen_tcp.listen(port, [:binary, active: false, reuseaddr: true])
-    do
+         {:ok, sock} <- :gen_tcp.listen(port, [:binary, active: false, reuseaddr: true]) do
       GenServer.start_link(
         __MODULE__,
-       %__MODULE__{port: port, socket: sock, callback: clbk, wrap: wrap})
+        %__MODULE__{port: port, socket: sock, callback: clbk, wrap: wrap}
+      )
     end
   end
 
@@ -64,12 +64,14 @@ defmodule EOD.Server.ConnManager do
   # Private Functions
 
   defp parse_port(num) when is_integer(num) and num in 1..65_535, do: {:ok, num}
+
   defp parse_port(num) when is_binary(num) do
     case Integer.parse(num) do
       {port, ""} -> parse_port(port)
       :error -> {:error, :invalid_port}
     end
   end
+
   defp parse_port(_), do: {:error, :invalid_port}
 
   defp def_clbk, do: {:send, :new_conn, self()}
@@ -77,8 +79,11 @@ defmodule EOD.Server.ConnManager do
   defp check_callback({:send, _, pid} = clbk) when is_pid(pid), do: {:ok, clbk}
 
   defp check_wrap(:none), do: {:ok, :none}
+
   defp check_wrap({module, fun, args} = wrap)
-    when is_atom(module) and is_atom(fun) and is_list(args), do: {:ok, wrap}
+       when is_atom(module) and is_atom(fun) and is_list(args),
+       do: {:ok, wrap}
+
   defp check_wrap(_), do: {:error, :invalid_wrap}
 
   defp start_accepting(state) do
@@ -90,10 +95,11 @@ defmodule EOD.Server.ConnManager do
   defp accept(state) do
     {:ok, client_socket} = :gen_tcp.accept(state.socket)
 
-    wrapped_socket = case state.wrap do
-      :none -> client_socket
-      {module, fun, args} -> apply(module, fun, [client_socket|args])
-    end
+    wrapped_socket =
+      case state.wrap do
+        :none -> client_socket
+        {module, fun, args} -> apply(module, fun, [client_socket | args])
+      end
 
     case state.callback do
       {:send, term, pid} -> send(pid, {term, wrapped_socket})

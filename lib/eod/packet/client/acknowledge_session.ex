@@ -9,10 +9,10 @@ defmodule EOD.Packet.Client.AcknowledgeSession do
     * `EOD.Packet.Server.AssignSession`
   """
   use EOD.Packet do
-    code 0xAC
-    id :acknowledge_session
+    code(0xAC)
+    id(:acknowledge_session)
 
-    field :session_id, :integer, size: [bytes: 2]
-    blank           using: 0x00, size: [bytes: 2]
+    field(:session_id, :integer, size: [bytes: 2])
+    blank(using: 0x00, size: [bytes: 2])
   end
 end
