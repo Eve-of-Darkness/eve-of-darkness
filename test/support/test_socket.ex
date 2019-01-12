@@ -89,6 +89,10 @@ defmodule EOD.TestSocket do
 
   # GenServer Callbacks
 
+  def init(args) do
+    {:ok, args}
+  end
+
   def handle_info({:shutdown, ref}, %{ref: ref}=state) do
     {:stop, :normal, state}
   end
