@@ -4,4 +4,4 @@ use Mix.Config
 
 config :eve_of_darkness, ecto_repos: [EOD.Repo]
 
-import_config "#{Mix.env}.exs"
+import_config "#{Mix.env()}.exs"

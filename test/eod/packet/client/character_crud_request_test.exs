@@ -49,14 +49,14 @@ defmodule EOD.Packet.Client.CharacterCrudRequestTest do
     test "it can create a binary" do
       {:ok, bin} =
         %Character{name: "bigb", charisma: 200}
-        |> Character.to_binary
+        |> Character.to_binary()
 
       expected = pad(4) <> pad("bigb", 139) <> <<200>> <> pad(44)
       assert bin == expected
     end
 
     test "it's packet size is 188" do
-      assert Character.packet_size == 188
+      assert Character.packet_size() == 188
     end
   end
 
@@ -64,12 +64,11 @@ defmodule EOD.Packet.Client.CharacterCrudRequestTest do
     test "it works as a struct" do
       req = %CrudReq{}
       assert req.username == ""
-      assert req.characters ==
-        Stream.repeatedly(fn -> %Character{} end) |> Enum.take(10)
+      assert req.characters == Stream.repeatedly(fn -> %Character{} end) |> Enum.take(10)
     end
 
     test "it can create a binary" do
-      {:ok, bin} = %CrudReq{username: "b-dawg"} |> CrudReq.to_binary
+      {:ok, bin} = %CrudReq{username: "b-dawg"} |> CrudReq.to_binary()
       assert bin == pad("b-dawg", 24) <> String.duplicate(pad(188), 10)
     end
 
@@ -77,11 +76,11 @@ defmodule EOD.Packet.Client.CharacterCrudRequestTest do
       bin = pad("j-man", 24) <> String.duplicate(pad(188), 9) <> pad(<<0::32, "cheese">>, 188)
       {:ok, req} = CrudReq.from_binary(bin)
       assert req.username == "j-man"
-      assert req.characters |> List.last |> Map.get(:name) == "cheese"
+      assert req.characters |> List.last() |> Map.get(:name) == "cheese"
     end
 
     test "it's packet size is 1904" do
-      assert CrudReq.packet_size == 1904
+      assert CrudReq.packet_size() == 1904
     end
   end
 

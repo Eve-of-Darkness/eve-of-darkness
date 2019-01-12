@@ -12,22 +12,23 @@ defmodule EOD.Client.PacketHandler do
 
   defmacro __using__(_) do
     quote do
-      import EOD.Client.PacketHandler, only: [
-        send_tcp: 2,
-        disconnect!: 1,
-        change_state: 2,
-        register_client_session: 1,
-        set_account: 2,
-        select_realm: 2,
-        handles_packets: 1,
-        region_manager: 1
-      ]
+      import EOD.Client.PacketHandler,
+        only: [
+          send_tcp: 2,
+          disconnect!: 1,
+          change_state: 2,
+          register_client_session: 1,
+          set_account: 2,
+          select_realm: 2,
+          handles_packets: 1,
+          region_manager: 1
+        ]
 
       def handle_packet(client, %{id: packet_id, data: data} = packet) do
         apply(__MODULE__, packet_id, [client, data])
       end
 
-      defoverridable [handle_packet: 2]
+      defoverridable handle_packet: 2
 
       alias EOD.Client
     end
@@ -41,6 +42,7 @@ defmodule EOD.Client.PacketHandler do
   defmacro handles_packets(packets) do
     packets = Enum.map(packets, &Macro.expand(&1, __CALLER__))
     ids = Enum.map(packets, &apply(&1, :packet_id, []))
+
     quote do
       defmacro handles, do: unquote(ids)
     end
@@ -53,6 +55,7 @@ defmodule EOD.Client.PacketHandler do
     Socket.send(socket, fun.(client))
     client
   end
+
   def send_tcp(%Client{tcp_socket: socket} = client, msg) do
     Socket.send(socket, msg)
     client

@@ -11,10 +11,10 @@ defmodule EOD.Client.LoginPacketHandler do
 
   @version_keys [:build, :major, :minor, :patch, :rev]
 
-  handles_packets [
+  handles_packets([
     EOD.Packet.Client.HandShakeRequest,
     EOD.Packet.Client.LoginRequest
-  ]
+  ])
 
   def handshake_request(%Client{state: :unknown} = client, data) do
     client
@@ -24,10 +24,8 @@ defmodule EOD.Client.LoginPacketHandler do
   end
 
   def login_request(%Client{state: :handshake} = client, data) do
-    with \
-      {:ok, account} <- find_or_create_account(data),
-      {:ok, registered_client} <- register_client_session(client)
-    do
+    with {:ok, account} <- find_or_create_account(data),
+         {:ok, registered_client} <- register_client_session(client) do
       registered_client
       |> set_account(account)
       |> send_tcp(good_login_msg(data))
@@ -58,14 +56,15 @@ defmodule EOD.Client.LoginPacketHandler do
       type: data.type,
       rev: data.rev,
       build: data.build,
-      version: "#{data.major}.#{data.minor}#{data.patch}"}
+      version: "#{data.major}.#{data.minor}#{data.patch}"
+    }
   end
 
   defp find_or_create_account(%{username: username, password: password} = data) do
-    case Account.find_by_username(username) |> Repo.one do
+    case Account.find_by_username(username) |> Repo.one() do
       nil ->
-        with {:error, _} <- Map.from_struct(data) |> Account.new() |> Repo.insert,
-        do: {:error, :account_invalid}
+        with {:error, _} <- Map.from_struct(data) |> Account.new() |> Repo.insert(),
+             do: {:error, :account_invalid}
 
       account ->
         if Account.correct_password?(account, password) do

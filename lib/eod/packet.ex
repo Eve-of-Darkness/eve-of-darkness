@@ -9,7 +9,7 @@ defmodule EOD.Packet do
   reading the game packets as well as be easy to change.
   """
 
-  defmacro __using__([do: block]) do
+  defmacro __using__(do: block) do
     quote do
       Module.register_attribute(__MODULE__, :bin_patterns, accumulate: true)
       @substructure false
@@ -24,12 +24,12 @@ defmodule EOD.Packet do
         :ok
       end
 
-      Module.eval_quoted __ENV__, [
+      Module.eval_quoted(__ENV__, [
         EOD.Packet.__defstruct__(@bin_patterns),
-        EOD.Packet.__def_from_binary__(@bin_patterns |> Enum.reverse),
-        EOD.Packet.__def_to_binary__(@bin_patterns |> Enum.reverse),
-        EOD.Packet.__def_packet_size__(@bin_patterns |> Enum.reverse)
-      ]
+        EOD.Packet.__def_from_binary__(@bin_patterns |> Enum.reverse()),
+        EOD.Packet.__def_to_binary__(@bin_patterns |> Enum.reverse()),
+        EOD.Packet.__def_packet_size__(@bin_patterns |> Enum.reverse())
+      ])
     end
   end
 
@@ -108,9 +108,11 @@ defmodule EOD.Packet do
   """
   defmacro blank(opts) do
     quote do
-      Module.put_attribute(__MODULE__,
-                           :bin_patterns,
-                           {nil, EOD.Packet.Field.Blank, unquote(opts)})
+      Module.put_attribute(
+        __MODULE__,
+        :bin_patterns,
+        {nil, EOD.Packet.Field.Blank, unquote(opts)}
+      )
     end
   end
 
@@ -165,14 +167,16 @@ defmodule EOD.Packet do
   extra space the end of the string because the `c_string` processing
   will handle that for you.
   """
-  defmacro compound(name, type, opts, [do: block]) do
+  defmacro compound(name, type, opts, do: block) do
     type = convert_known_types(type)
     alias EOD.Packet.Field.Compound
     {_, _, lines} = block
 
-    fields = Enum.map(lines, fn {:field, _, [fieldname, [default: default]]} ->
-      [name: fieldname, default: default]
-    end)
+    fields =
+      Enum.map(lines, fn {:field, _, [fieldname, [default: default]]} ->
+        [name: fieldname, default: default]
+      end)
+
     opts = Keyword.put(opts, :fields, fields)
 
     quote bind_quoted: [name: name, type: type, opts: opts] do
@@ -205,9 +209,10 @@ defmodule EOD.Packet do
   %{ bill | gender: :male } |> Person.to_binary #=> <<"billy", 0, 0, 0, 0, 0, 2>>
   ```
   """
-  defmacro enum(name, type, opts, [do: block]) do
+  defmacro enum(name, type, opts, do: block) do
     type = convert_known_types(type)
     alias EOD.Packet.Field.Enumeration
+
     enums =
       block
       |> Enum.filter(&match?({:->, [_], [[_], _]}, &1))
@@ -227,16 +232,17 @@ defmodule EOD.Packet do
   that just like with any field, the order is important and must match up with the
   binary data that it's reading.
   """
-  defmacro structure(name, [do: block]) do
+  defmacro structure(name, do: block) do
     new_mod = Module.concat(__CALLER__.module, Macro.expand_once(name, __CALLER__))
 
     quote do
       defmodule unquote(new_mod) do
         use EOD.Packet do
-          substructure true
+          substructure(true)
           unquote(block)
         end
       end
+
       alias unquote(new_mod)
     end
   end
@@ -269,16 +275,18 @@ defmodule EOD.Packet do
         unquote_splicing(processing)
         {:ok, %__MODULE__{unquote_splicing(struct_matches)}}
       end
+
       def from_binary(_), do: {:error, {:no_match, __MODULE__}}
-      defoverridable [from_binary: 1]
+      defoverridable from_binary: 1
 
       if @substructure do
         def from_binary_substructure(<<unquote_splicing(binary_matches), rem::binary>>) do
           unquote_splicing(processing)
           {:ok, %__MODULE__{unquote_splicing(struct_matches)}, rem}
         end
+
         def from_binary_substructure(_), do: {:error, {:no_match, __MODULE__}}
-        defoverridable [from_binary_substructure: 1]
+        defoverridable from_binary_substructure: 1
       end
     end
   end
@@ -294,8 +302,9 @@ defmodule EOD.Packet do
         unquote_splicing(processing)
         {:ok, <<unquote_splicing(binary_buildings)>>}
       end
+
       def to_binary(_), do: {:error, {:no_match, __MODULE__}}
-      defoverridable [to_binary: 1]
+      defoverridable to_binary: 1
     end
   end
 
@@ -304,12 +313,12 @@ defmodule EOD.Packet do
     size =
       collect(:size, fields)
       |> Enum.reduce(0, fn
-                       :anchored_dynamic, :dynamic -> :dynamic
-                       :anchored_dynamic, _ -> :anchored_dynamic
-                       :dynamic, _ -> :dynamic
-                       _, :dynamic -> :dynamic
-                       _, :anchored_dynamic -> :anchored_dynamic
-                       size, total -> size + total
+        :anchored_dynamic, :dynamic -> :dynamic
+        :anchored_dynamic, _ -> :anchored_dynamic
+        :dynamic, _ -> :dynamic
+        _, :dynamic -> :dynamic
+        _, :anchored_dynamic -> :anchored_dynamic
+        size, total -> size + total
       end)
 
     size =
@@ -328,7 +337,7 @@ defmodule EOD.Packet do
       apply(type, what, [{name, opts}])
     end)
     |> Enum.reject(&is_nil/1)
-    |> List.flatten
+    |> List.flatten()
   end
 
   defp convert_known_types(type) do

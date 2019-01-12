@@ -48,10 +48,10 @@ defmodule EOD.Client do
 
   def init(state) do
     {:ok,
-      state
-      |> Map.put(:client, self())
-      |> Map.put(:ref, make_ref())
-      |> begin_listener}
+     state
+     |> Map.put(:client, self())
+     |> Map.put(:ref, make_ref())
+     |> begin_listener}
   end
 
   def handle_cast({:send_message, message}, state) do
@@ -71,13 +71,13 @@ defmodule EOD.Client do
 
     updated =
       case packet.id do
-        id when id in Client.LoginPacketHandler.handles ->
+        id when id in Client.LoginPacketHandler.handles() ->
           Client.LoginPacketHandler.handle_packet(state, packet)
 
-        id when id in Client.ConnectivityPacketHandler.handles ->
+        id when id in Client.ConnectivityPacketHandler.handles() ->
           Client.ConnectivityPacketHandler.handle_packet(state, packet)
 
-        id when id in Client.CharacterSelectPacketHandler.handles ->
+        id when id in Client.CharacterSelectPacketHandler.handles() ->
           Client.CharacterSelectPacketHandler.handle_packet(state, packet)
 
         _ ->
@@ -93,7 +93,7 @@ defmodule EOD.Client do
         {:stop, :normal, state}
 
       reason ->
-        Logger.error "Packet Error: #{reason}"
+        Logger.error("Packet Error: #{reason}")
         {:noreply, state}
     end
   end

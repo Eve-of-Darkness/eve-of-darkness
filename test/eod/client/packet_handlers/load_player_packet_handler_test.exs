@@ -7,9 +7,10 @@ defmodule EOD.Client.LoadPlayerPacketHandlerTest do
 
   setup context do
     selected_char = context[:selected_char] || build(:character)
+
     {:ok,
-      handler: LoadPlayerPacketHandler,
-      client: %{context.client | selected_character: selected_char}}
+     handler: LoadPlayerPacketHandler,
+     client: %{context.client | selected_character: selected_char}}
   end
 
   describe "game_open_request" do

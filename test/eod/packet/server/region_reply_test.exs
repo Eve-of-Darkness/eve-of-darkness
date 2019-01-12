@@ -13,14 +13,17 @@ defmodule EOD.Packet.Server.RegionReplyTest do
 
   test "it can create a binary" do
     region = %RegionReply{
-      id: 18, name: "region018", port_1: "10300",
-      port_2: "10300", ip_address: "192.168.1.130"
+      id: 18,
+      name: "region018",
+      port_1: "10300",
+      port_2: "10300",
+      ip_address: "192.168.1.130"
     }
 
-    {:ok, bin} = region |> RegionReply.to_binary
+    {:ok, bin} = region |> RegionReply.to_binary()
 
-    assert bin == <<0, 18>> <> pad("region018", 20) <>
-                  "10300" <> "10300" <> pad("192.168.1.130", 20)
+    assert bin ==
+             <<0, 18>> <> pad("region018", 20) <> "10300" <> "10300" <> pad("192.168.1.130", 20)
   end
 
   defp pad(str, amount), do: String.pad_trailing(str, amount, <<0>>)

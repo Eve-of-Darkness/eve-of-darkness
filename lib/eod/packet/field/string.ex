@@ -21,7 +21,7 @@ defmodule EOD.Packet.Field.String do
     size = string_size_opt(name, opts)
 
     quote do
-      unquote(Macro.var(name, nil)) :: bytes-size(unquote(size))
+      unquote(Macro.var(name, nil)) :: bytes - size(unquote(size))
     end
   end
 

@@ -10,13 +10,13 @@ defmodule EOD.Packet.Client.AcknowledgeSessionTest do
   test "it can create a binary" do
     {:ok, bin} =
       %AckSession{session_id: 50_000}
-      |> AckSession.to_binary
+      |> AckSession.to_binary()
 
     assert bin == <<0xC3, 0x50, 0, 0>>
   end
 
   test "it can be created from a binary" do
-    {:ok, ack} = <<0xC3, 0x51, 0, 0>> |> AckSession.from_binary
+    {:ok, ack} = <<0xC3, 0x51, 0, 0>> |> AckSession.from_binary()
     assert ack == %AckSession{session_id: 50_001}
   end
 end

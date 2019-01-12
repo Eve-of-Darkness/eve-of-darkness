@@ -8,12 +8,11 @@ defmodule EOD.Packet.Server.Realm.Test do
   end
 
   test "it can convert from a binary" do
-    {:ok, req} = <<2::8>> |> Realm.from_binary
+    {:ok, req} = <<2::8>> |> Realm.from_binary()
     assert req.realm == :midgard
   end
 
   test "it can convert to a binary" do
-    assert {:ok, <<1::8>>} ==
-      %Realm{realm: :albion} |> Realm.to_binary
+    assert {:ok, <<1::8>>} == %Realm{realm: :albion} |> Realm.to_binary()
   end
 end

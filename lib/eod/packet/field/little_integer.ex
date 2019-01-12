@@ -18,7 +18,7 @@ defmodule EOD.Packet.Field.LittleInteger do
     size = size_from_opts(name, opts)
 
     quote do
-      unquote(Macro.var(name, nil)) :: little-integer-size(unquote(size))
+      unquote(Macro.var(name, nil)) :: little - integer - size(unquote(size))
     end
   end
 

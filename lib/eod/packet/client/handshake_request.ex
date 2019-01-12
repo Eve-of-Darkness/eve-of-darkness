@@ -7,15 +7,15 @@ defmodule EOD.Packet.Client.HandShakeRequest do
     * `EOD.Packet.Server.HandshakeResponse`
   """
   use EOD.Packet do
-    code 0xF4
-    id :handshake_request
+    code(0xF4)
+    id(:handshake_request)
 
-    field :addons, :integer, size: [bits: 4]
-    field :type,   :integer, size: [bits: 4]
-    field :major,  :integer, size: [bytes: 1]
-    field :minor,  :integer, size: [bytes: 1]
-    field :patch,  :integer, size: [bytes: 1]
-    field :rev,    :integer, size: [bytes: 1]
-    field :build,  :integer, size: [bytes: 2]
+    field(:addons, :integer, size: [bits: 4])
+    field(:type, :integer, size: [bits: 4])
+    field(:major, :integer, size: [bytes: 1])
+    field(:minor, :integer, size: [bytes: 1])
+    field(:patch, :integer, size: [bytes: 1])
+    field(:rev, :integer, size: [bytes: 1])
+    field(:build, :integer, size: [bytes: 2])
   end
 end

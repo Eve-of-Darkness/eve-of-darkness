@@ -8,7 +8,7 @@ defmodule EOD.Packet.Server.Realm do
   * `EOD.Packet.Server.CharacterOverviewResponse`
   """
   use EOD.Packet do
-    code 0xFE
+    code(0xFE)
 
     enum :realm, :integer, size: [bytes: 1], default: 0 do
       0 -> :none

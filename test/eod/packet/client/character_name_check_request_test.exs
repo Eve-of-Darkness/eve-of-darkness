@@ -11,7 +11,7 @@ defmodule EOD.Packet.Client.CharacterNameCheckRequestTest do
   test "it can create a binary" do
     {:ok, bin} =
       %NameCheck{character_name: "cheesepicklesonions", username: "ben"}
-      |> NameCheck.to_binary
+      |> NameCheck.to_binary()
 
     assert bin == pad("cheesepicklesonions", 30) <> pad("ben", 24) <> <<0, 0, 0, 0>>
   end
@@ -24,7 +24,7 @@ defmodule EOD.Packet.Client.CharacterNameCheckRequestTest do
   end
 
   test "it's packet size is 58" do
-    assert NameCheck.packet_size == 58
+    assert NameCheck.packet_size() == 58
   end
 
   defp pad(string, amount), do: String.pad_trailing(string, amount, <<0>>)

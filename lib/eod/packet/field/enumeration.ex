@@ -28,6 +28,7 @@ defmodule EOD.Packet.Field.Enumeration do
 
   def from_binary_process({{name, type}, opts}) do
     processing = List.wrap(apply(type, :from_binary_process, [{name, opts}]))
+
     matches =
       enum_from_opts(opts)
       |> Enum.map(fn {raw, val} ->
@@ -36,9 +37,11 @@ defmodule EOD.Packet.Field.Enumeration do
 
     quote do
       unquote_splicing(processing)
-      unquote(Macro.var(name, nil)) = case unquote(Macro.var(name, nil)) do
-        unquote(matches)
-      end
+
+      unquote(Macro.var(name, nil)) =
+        case unquote(Macro.var(name, nil)) do
+          unquote(matches)
+        end
     end
   end
 
@@ -48,6 +51,7 @@ defmodule EOD.Packet.Field.Enumeration do
 
   def to_binary_process({{name, type}, opts}) do
     processing = List.wrap(apply(type, :to_binary_process, [{name, opts}]))
+
     matches =
       enum_from_opts(opts)
       |> Enum.map(fn {raw, val} ->
@@ -55,9 +59,11 @@ defmodule EOD.Packet.Field.Enumeration do
       end)
 
     quote do
-      unquote(Macro.var(name, nil)) = case unquote(Macro.var(name, nil)) do
-        unquote(matches)
-      end
+      unquote(Macro.var(name, nil)) =
+        case unquote(Macro.var(name, nil)) do
+          unquote(matches)
+        end
+
       unquote_splicing(processing)
     end
   end

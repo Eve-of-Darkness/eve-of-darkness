@@ -10,6 +10,7 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
   describe "#char_select_request" do
     setup tags do
       alias Packet.Client.CharacterSelectRequest, as: CharSelReq
+
       chars = [
         insert(:character, name: "Ben", slot: 0),
         insert(:character, name: "Seb", slot: 5)
@@ -73,6 +74,7 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
 
   describe "#char_overview_request" do
     alias EOD.Packet.Server.{Realm}
+
     setup tags do
       alias EOD.Packet.Client.CharacterOverviewRequest, as: CharOverviewReq
       alb = insert(:character, account: tags.account, realm: 1, slot: 0, name: "alb")
@@ -81,11 +83,7 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
       insert(:character, realm: 1, name: "differentowner")
 
       client = handle_packet(tags, %CharOverviewReq{realm: tags[:realm]})
-      {:ok,
-        alb: alb,
-        mid: mid,
-        hib: hib,
-        client: client}
+      {:ok, alb: alb, mid: mid, hib: hib, client: client}
     end
 
     @tag realm: :none
@@ -99,7 +97,7 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
       char_ids = context.client.characters |> Enum.map(& &1.id)
       assert [context.alb.id] == char_ids
       assert %Realm{realm: :albion} = received_packet(context)
-      assert %CharOverviewResp{characters: [char|_]} = resp = received_packet(context)
+      assert %CharOverviewResp{characters: [char | _]} = resp = received_packet(context)
       assert resp.username == context.account.username
       assert char.name == context.alb.name
     end
@@ -109,7 +107,7 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
       char_ids = context.client.characters |> Enum.map(& &1.id)
       assert [context.mid.id] == char_ids
       assert %Realm{realm: :midgard} = received_packet(context)
-      assert %CharOverviewResp{characters: [char|_]} = resp = received_packet(context)
+      assert %CharOverviewResp{characters: [char | _]} = resp = received_packet(context)
       assert resp.username == context.account.username
       assert char.name == context.mid.name
     end
@@ -119,7 +117,7 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
       char_ids = context.client.characters |> Enum.map(& &1.id)
       assert [context.hib.id] == char_ids
       assert %Realm{realm: :hibernia} = received_packet(context)
-      assert %CharOverviewResp{characters: [char|_]} = resp = received_packet(context)
+      assert %CharOverviewResp{characters: [char | _]} = resp = received_packet(context)
       assert resp.username == context.account.username
       assert char.name == context.hib.name
     end
@@ -129,17 +127,18 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
     alias EOD.Packet.Client.CharacterCrudRequest, as: CharCrudReq
 
     setup tags do
-      {:ok, client: %{ tags.client | selected_realm: :albion }}
+      {:ok, client: %{tags.client | selected_realm: :albion}}
     end
 
     test "creating a character", context do
       blanks = 1..9 |> Enum.map(fn _ -> %CharCrudReq.Character{action: :create} end)
+
       ben =
         params_for(:character, name: "ben")
         |> Enum.reduce(%CharCrudReq.Character{}, fn {k, v}, char -> Map.put(char, k, v) end)
         |> Map.put(:action, :create)
 
-      packet = %CharCrudReq{characters: [ben|blanks]}
+      packet = %CharCrudReq{characters: [ben | blanks]}
       client = handle_packet(context, packet)
       [char] = client.characters
       assert char.name == "ben"

@@ -10,7 +10,7 @@ defmodule EOD.Packet.Server.LoginDenied do
     * `EOD.Packet.Client.LoginRequest`
   """
   use EOD.Packet do
-    code 0x2C
+    code(0x2C)
 
     enum :reason, :integer, size: [bytes: 1], default: 0x02 do
       0x01 -> :wrong_password
@@ -35,9 +35,9 @@ defmodule EOD.Packet.Server.LoginDenied do
       0x17 -> :expansion_version_not_permited
     end
 
-    blank          using: 0x01, size: [bytes: 1]
-    field :major, :integer, size: [bytes: 1]
-    field :minor, :integer, size: [bytes: 1]
-    blank          using: 0x00, size: [bytes: 2]
+    blank(using: 0x01, size: [bytes: 1])
+    field(:major, :integer, size: [bytes: 1])
+    field(:minor, :integer, size: [bytes: 1])
+    blank(using: 0x00, size: [bytes: 2])
   end
 end

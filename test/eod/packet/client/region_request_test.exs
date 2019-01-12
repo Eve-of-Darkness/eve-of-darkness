@@ -8,14 +8,14 @@ defmodule EOD.Packet.Client.RegionRequestTest do
   end
 
   test "it create a binary" do
-    {:ok, bin} = %RegionRequest{} |> RegionRequest.to_binary
+    {:ok, bin} = %RegionRequest{} |> RegionRequest.to_binary()
     assert bin == String.duplicate(<<0>>, 30)
   end
 
   test "it can be created from a binary" do
     {:ok, req} =
       String.duplicate(<<0>>, 30)
-      |> RegionRequest.from_binary
+      |> RegionRequest.from_binary()
 
     assert %RegionRequest{} = req
   end

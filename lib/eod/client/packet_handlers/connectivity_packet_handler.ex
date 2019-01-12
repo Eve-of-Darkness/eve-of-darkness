@@ -9,17 +9,18 @@ defmodule EOD.Client.ConnectivityPacketHandler do
   alias EOD.Packet.Server.{PingReply, RegionReply}
   alias EOD.Region
 
-  handles_packets [
+  handles_packets([
     EOD.Packet.Client.AcknowledgeSession,
     EOD.Packet.Client.ClosingConnection,
     EOD.Packet.Client.PingRequest,
     EOD.Packet.Client.RegionRequest
-  ]
+  ])
 
   # Override the default handle_packet/2 to send the whole packet
   # to ping_request/2, it needs the sequence from the packet
   def handle_packet(client, %{id: :ping_request} = packet),
     do: ping_request(client, packet)
+
   def handle_packet(client, packet), do: super(client, packet)
 
   @doc """
@@ -50,11 +51,10 @@ defmodule EOD.Client.ConnectivityPacketHandler do
   @doc """
   """
   def region_request(client, _packet) do
-    with \
-      {:ok, region} <- selected_character_region(client),
-      overview <- Region.get_overview(region)
-    do
-      client |> send_tcp(%RegionReply{
+    with {:ok, region} <- selected_character_region(client),
+         overview <- Region.get_overview(region) do
+      client
+      |> send_tcp(%RegionReply{
         id: overview.region_id,
         name: "#{overview.name}",
         port_1: "#{overview.tcp_port}",
@@ -69,6 +69,7 @@ defmodule EOD.Client.ConnectivityPacketHandler do
   defp selected_character_region(%Client{selected_character: :none}) do
     {:error, :no_region}
   end
+
   defp selected_character_region(%Client{selected_character: char} = client) do
     client
     |> region_manager

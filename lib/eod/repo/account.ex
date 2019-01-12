@@ -6,9 +6,9 @@ defmodule EOD.Repo.Account do
   use EOD.Repo.Schema
 
   schema "accounts" do
-    field :username, :string
-    field :password, :string
-    has_many :characters, EOD.Repo.Character
+    field(:username, :string)
+    field(:password, :string)
+    has_many(:characters, EOD.Repo.Character)
     timestamps()
   end
 
@@ -25,9 +25,10 @@ defmodule EOD.Repo.Account do
   def new(params \\ %{}), do: changeset(%__MODULE__{}, params)
 
   def correct_password?(%__MODULE__{password: hash}, password)
-  when is_binary(hash) and is_binary(password),
-    do: Comeonin.Pbkdf2.checkpw(password, hash)
-  def correct_password?(_, _), do: Comeonin.Pbkdf2.dummy_checkpw
+      when is_binary(hash) and is_binary(password),
+      do: Comeonin.Pbkdf2.checkpw(password, hash)
+
+  def correct_password?(_, _), do: Comeonin.Pbkdf2.dummy_checkpw()
 
   def find_by_username(query \\ __MODULE__, name) when is_binary(name) do
     from(
@@ -39,5 +40,6 @@ defmodule EOD.Repo.Account do
   defp hash_password(%Ecto.Changeset{changes: %{password: password}} = changeset) do
     put_change(changeset, :password, Comeonin.Pbkdf2.hashpwsalt(password))
   end
+
   defp hash_password(changeset), do: changeset
 end

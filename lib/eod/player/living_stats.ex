@@ -20,10 +20,12 @@ defmodule EOD.Player.LivingStats do
   @living_stats %{
     hp: %{current: :current_hp, max: :max_hp, percent: :hp_percent},
     mana: %{current: :current_mana, max: :max_mana, percent: :mana_percent},
-    endurance: %{current: :current_endurance, max: :max_endurance,
-                 percent: :endurance_percent},
-    concentration: %{current: :current_concentration,
-                     max: :max_concentration, percent: :concentration_percent},
+    endurance: %{current: :current_endurance, max: :max_endurance, percent: :endurance_percent},
+    concentration: %{
+      current: :current_concentration,
+      max: :max_concentration,
+      percent: :concentration_percent
+    }
   }
 
   @doc """
@@ -34,10 +36,8 @@ defmodule EOD.Player.LivingStats do
     living_stats = %EOD.Packet.Server.CharacterStatusUpdate{
       hp_percent: as_percent(char.max_hp, char.current_hp),
       mana_percent: as_percent(char.max_mana, char.current_mana),
-      endurance_percent: as_percent(
-        char.max_endurance, char.current_endurance),
-      concentration_percent: as_percent(
-        char.max_concentration, char.current_concentration),
+      endurance_percent: as_percent(char.max_endurance, char.current_endurance),
+      concentration_percent: as_percent(char.max_concentration, char.current_concentration),
       max_mana: char.max_mana || 0,
       max_endurance: char.max_endurance || 0,
       max_concentration: char.max_concentration || 0,
@@ -87,29 +87,36 @@ defmodule EOD.Player.LivingStats do
   for {stat, keys} <- @living_stats do
     def living_delta_change(%Player{} = player, unquote(stat), delta) do
       stats = player.data.living_stats
-      new_amount = stats. unquote(keys.current) + delta
+      new_amount = stats.unquote(keys.current) + delta
 
       cond do
         new_amount <= 0 ->
           put_in(
             player.data.living_stats,
-            %{stats | unquote(keys.current) => 0, unquote(keys.percent) => 0})
+            %{stats | unquote(keys.current) => 0, unquote(keys.percent) => 0}
+          )
 
-        new_amount >= stats. unquote(keys.max) ->
+        new_amount >= stats.unquote(keys.max) ->
           put_in(
             player.data.living_stats,
-            %{stats | unquote(keys.current) => 100, unquote(keys.percent) => 100})
+            %{stats | unquote(keys.current) => 100, unquote(keys.percent) => 100}
+          )
 
         true ->
           put_in(
             player.data.living_stats,
-            %{stats | unquote(keys.current) => new_amount,
-              unquote(keys.percent) => as_percent(stats.max_hp, new_amount)})
+            %{
+              stats
+              | unquote(keys.current) => new_amount,
+                unquote(keys.percent) => as_percent(stats.max_hp, new_amount)
+            }
+          )
       end
     end
   end
+
   def living_delta_change(%Player{} = player, :is_sitting?, delta)
-  when delta in [true, false] do
+      when delta in [true, false] do
     put_in(player.data.living_stats.is_sitting?, delta)
   end
 

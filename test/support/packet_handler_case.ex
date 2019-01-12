@@ -20,22 +20,23 @@ defmodule EOD.PacketHandlerCase do
 
   setup tags do
     setup_database_test_transactions(tags)
-    server_settings = tags[:server_settings] || Server.Settings.new
+    server_settings = tags[:server_settings] || Server.Settings.new()
 
-    {:ok, socket} = TestSocket.start_link
+    {:ok, socket} = TestSocket.start_link()
     {:ok, server} = Server.start_link(conn_manager: :disabled, settings: server_settings)
 
     account = insert(:account)
 
     {:ok,
-      client: %Client{session_id: tags[:session_id] || 7,
-                      tcp_socket: socket,
-                      server: server,
-                      account: account},
-
-      account: account,
-      server: server,
-      socket: TestSocket.set_role(socket, :client)}
+     client: %Client{
+       session_id: tags[:session_id] || 7,
+       tcp_socket: socket,
+       server: server,
+       account: account
+     },
+     account: account,
+     server: server,
+     socket: TestSocket.set_role(socket, :client)}
   end
 
   @doc """
@@ -49,18 +50,20 @@ defmodule EOD.PacketHandlerCase do
   handle_packet/2 does not return `%Client{}`, as this is the expected flow for
   all packet handlers.
   """
-  def handle_packet(%{client: client, handler: handler}, packet=%ClientPacket{}) do
+  def handle_packet(%{client: client, handler: handler}, packet = %ClientPacket{}) do
     case apply(handler, :handle_packet, [client, packet]) do
-      client = %Client{} -> client
+      client = %Client{} ->
+        client
 
       any ->
         raise """
         #{handler}.handle_packet/2 is expected to return a %EOD.Client{},
-        Got #{inspect any} instead.
+        Got #{inspect(any)} instead.
         """
     end
   end
-  def handle_packet(client_and_handler, packet=%{__struct__: module}) do
+
+  def handle_packet(client_and_handler, packet = %{__struct__: module}) do
     id = apply(module, :packet_id, [])
     handle_packet(client_and_handler, %ClientPacket{id: id, data: packet})
   end

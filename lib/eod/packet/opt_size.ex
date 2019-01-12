@@ -20,7 +20,7 @@ defmodule EOD.Packet.OptSize do
         number * 8
 
       wrong_opt ->
-        raise ArgumentError, "Invalid size for field :#{name} [#{inspect wrong_opt}]"
+        raise ArgumentError, "Invalid size for field :#{name} [#{inspect(wrong_opt)}]"
     end
   end
 

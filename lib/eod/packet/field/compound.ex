@@ -7,7 +7,7 @@ defmodule EOD.Packet.Field.Compound do
 
   def struct_field_pair({{_name, _type}, opts}) do
     Keyword.fetch!(opts, :fields)
-    |> List.wrap
+    |> List.wrap()
     |> Enum.map(fn field ->
       {field[:name], field[:default]}
     end)
@@ -27,7 +27,9 @@ defmodule EOD.Packet.Field.Compound do
 
     quote do
       unquote_splicing(processing)
-      %{unquote_splicing(pairs)} = compound(:from_binary, unquote(name), unquote(Macro.var(name, nil)))
+
+      %{unquote_splicing(pairs)} =
+        compound(:from_binary, unquote(name), unquote(Macro.var(name, nil)))
     end
   end
 
@@ -44,7 +46,9 @@ defmodule EOD.Packet.Field.Compound do
     processing = List.wrap(apply(type, :to_binary_process, [{name, opts}]))
 
     quote do
-      unquote(Macro.var(name, nil)) = compound(:to_binary, unquote(name), %{unquote_splicing(pairs)})
+      unquote(Macro.var(name, nil)) =
+        compound(:to_binary, unquote(name), %{unquote_splicing(pairs)})
+
       unquote_splicing(processing)
     end
   end
@@ -55,6 +59,7 @@ defmodule EOD.Packet.Field.Compound do
     opts[:fields]
     |> Enum.map(fn field ->
       name = field[:name]
+
       quote do
         {unquote(name), unquote(Macro.var(name, nil))}
       end

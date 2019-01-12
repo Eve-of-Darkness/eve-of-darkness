@@ -16,11 +16,11 @@ defmodule EOD.Packet.Client.CharacterSelectRequest do
     * `EOD.Packet.Server.AssignSession`
   """
   use EOD.Packet do
-    code 0x10
-    id :char_select_request
+    code(0x10)
+    id(:char_select_request)
 
-    blank using: 0x00, size: [bytes: 5]
-    field :char_name,  :c_string,  size: [bytes: 24]
-    blank using: 0x00, size: [bytes: 75]
+    blank(using: 0x00, size: [bytes: 5])
+    field(:char_name, :c_string, size: [bytes: 24])
+    blank(using: 0x00, size: [bytes: 75])
   end
 end

@@ -12,6 +12,7 @@ defmodule EOD.Packet.Field.Blank do
       _ :: binary
     end
   end
+
   def from_binary_match({_, opts}) do
     size = number_size_opt(:blank, opts)
 
@@ -25,6 +26,7 @@ defmodule EOD.Packet.Field.Blank do
   def to_binary_match(_), do: nil
 
   def to_binary_bin({_, :remaining}), do: nil
+
   def to_binary_bin({_, opts}) do
     using = Keyword.get(opts, :using, 0)
     size = number_size_opt(:blank, opts)
@@ -38,4 +40,3 @@ defmodule EOD.Packet.Field.Blank do
     number_size_opt(:blank, opts)
   end
 end
-

@@ -10,16 +10,16 @@ defmodule EOD.Packet.Server.CharacterOverviewResponseTest do
   end
 
   test "it's size is correct" do
-    {:ok, bin} = %CharOverview{} |> CharOverview.to_binary
-    assert byte_size(bin) == CharOverview.packet_size
-    assert CharOverview.packet_size == 24 + (10 * 188) + 94
+    {:ok, bin} = %CharOverview{} |> CharOverview.to_binary()
+    assert byte_size(bin) == CharOverview.packet_size()
+    assert CharOverview.packet_size() == 24 + 10 * 188 + 94
   end
 
   test "it can be created from a binary" do
-    bin = pad("ben", 24) <> pad(188*9) <> pad(4) <> pad("ben", 184) <> pad(94)
+    bin = pad("ben", 24) <> pad(188 * 9) <> pad(4) <> pad("ben", 184) <> pad(94)
     {:ok, req} = CharOverview.from_binary(bin)
     assert req.username == "ben"
-    assert req.characters |> List.last |> Map.get(:name) == "ben"
+    assert req.characters |> List.last() |> Map.get(:name) == "ben"
   end
 
   test "it can create a binary" do
@@ -29,9 +29,9 @@ defmodule EOD.Packet.Server.CharacterOverviewResponseTest do
 
     {:ok, bin} =
       %CharOverview{username: "ben", characters: characters}
-      |> CharOverview.to_binary
+      |> CharOverview.to_binary()
 
-    remaining = 21 + (10 * 188) + 94
+    remaining = 21 + 10 * 188 + 94
     assert <<"ben", _::bytes-size(remaining)>> = bin
     assert <<_::bytes-size(24), _::bytes-size(4), "roflcopters", _::binary>> = bin
   end

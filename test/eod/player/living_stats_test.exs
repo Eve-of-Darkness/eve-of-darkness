@@ -5,20 +5,23 @@ defmodule EOD.Player.LivingStatsTest do
   alias EOD.Packet.Server.CharacterStatusUpdate
 
   setup _ do
-    char = build(:character,
-                 current_hp: 100, max_hp: 100,
-                 current_endurance: 100, max_endurance: 100,
-                 current_mana: 100, max_mana: 100,
-                 current_concentration: 100, max_concentration: 100)
+    char =
+      build(:character,
+        current_hp: 100,
+        max_hp: 100,
+        current_endurance: 100,
+        max_endurance: 100,
+        current_mana: 100,
+        max_mana: 100,
+        current_concentration: 100,
+        max_concentration: 100
+      )
 
     player = %Player{character: char, client: self()}
 
     {:ok, state} = LivingStats.init(player)
 
-    {:ok,
-      char: char,
-      player: player,
-      state: state}
+    {:ok, char: char, player: player, state: state}
   end
 
   describe "init" do

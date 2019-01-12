@@ -31,10 +31,8 @@ defmodule EOD.Client.Manager do
   # GenServer Callbacks
 
   def init(_) do
-    with \
-      {:ok, clients} <- client_supervisor(),
-      {:ok, sessions} <- Client.SessionManager.start_link
-    do
+    with {:ok, clients} <- client_supervisor(),
+         {:ok, sessions} <- Client.SessionManager.start_link() do
       {:ok, %__MODULE__{clients: clients, sessions: sessions}}
     end
   end
@@ -50,6 +48,7 @@ defmodule EOD.Client.Manager do
         state.clients,
         [%Client{tcp_socket: socket, sessions: state.sessions, server: server}]
       )
+
     {:noreply, state}
   end
 
@@ -57,10 +56,13 @@ defmodule EOD.Client.Manager do
 
   defp client_supervisor do
     alias EOD.Client
-    spec = Supervisor.child_spec(
-      Client,
-      start: {Client, :start_link, []},
-      restart: :transient)
+
+    spec =
+      Supervisor.child_spec(Client,
+        start: {Client, :start_link, []},
+        restart: :transient
+      )
+
     Supervisor.start_link([spec], strategy: :simple_one_for_one)
   end
 end

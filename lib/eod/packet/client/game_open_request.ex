@@ -10,9 +10,9 @@ defmodule EOD.Packet.Client.GameOpenRequest do
     * `EOD.Packet.Server.GameOpenReply`
   """
   use EOD.Packet do
-    code 0xBF
-    id :game_open_request
+    code(0xBF)
+    id(:game_open_request)
 
-    field :udp_verfied, :integer, size: [bytes: 1]
+    field(:udp_verfied, :integer, size: [bytes: 1])
   end
 end

@@ -6,9 +6,9 @@ defmodule EOD.Packet.Client.ClosingConnection do
   are other values so for now I'm choosing to do nothing with it.
   """
   use EOD.Packet do
-    code 0xB8
-    id :closing_connection
+    code(0xB8)
+    id(:closing_connection)
 
-    field :reason, :integer, size: [bytes: 1], default: 1
+    field(:reason, :integer, size: [bytes: 1], default: 1)
   end
 end

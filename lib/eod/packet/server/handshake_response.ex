@@ -8,12 +8,12 @@ defmodule EOD.Packet.Server.HandshakeResponse do
   `1.124`
   """
   use EOD.Packet do
-    code 0x22
+    code(0x22)
 
-    field :type,      :integer, size: [bytes: 1]
-    blank using: 0x00,          size: [bytes: 1]
-    field :version,   :string,  size: [bytes: 5]
-    field :rev,       :integer, size: [bytes: 1]
-    field :build,     :integer, size: [bytes: 2]
+    field(:type, :integer, size: [bytes: 1])
+    blank(using: 0x00, size: [bytes: 1])
+    field(:version, :string, size: [bytes: 5])
+    field(:rev, :integer, size: [bytes: 1])
+    field(:build, :integer, size: [bytes: 2])
   end
 end

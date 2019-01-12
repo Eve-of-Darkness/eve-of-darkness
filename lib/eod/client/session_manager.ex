@@ -7,7 +7,7 @@ defmodule EOD.Client.SessionManager do
   use GenServer
   alias EOD.Client
 
-  @empty :queue.new
+  @empty :queue.new()
 
   defstruct session_pool: @empty,
             amount_free: 0,
@@ -65,12 +65,13 @@ defmodule EOD.Client.SessionManager do
   # GenServer Callbacks
 
   def init(opts) do
-    session_pool = opts[:id_pool] |> Enum.to_list |> :queue.from_list
+    session_pool = opts[:id_pool] |> Enum.to_list() |> :queue.from_list()
 
-    {:ok, %__MODULE__{
-      session_pool: session_pool,
-      amount_free: session_pool |> :queue.len
-    }}
+    {:ok,
+     %__MODULE__{
+       session_pool: session_pool,
+       amount_free: session_pool |> :queue.len()
+     }}
   end
 
   def handle_call(:amount_free, _, state) do
@@ -86,10 +87,13 @@ defmodule EOD.Client.SessionManager do
         amount = state.amount_free - 1
         Process.monitor(pid)
 
-        {:reply, {:ok, id}, %{state |
-          session_pool: session_pool,
-          amount_free: amount,
-          used: Map.put(state.used, pid, id)}}
+        {:reply, {:ok, id},
+         %{
+           state
+           | session_pool: session_pool,
+             amount_free: amount,
+             used: Map.put(state.used, pid, id)
+         }}
     end
   end
 
@@ -97,7 +101,9 @@ defmodule EOD.Client.SessionManager do
 
   def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
     case state.used[pid] do
-      nil -> {:noreply, state}
+      nil ->
+        {:noreply, state}
+
       id ->
         pool = :queue.in(id, state.session_pool)
         amount = state.amount_free + 1

@@ -21,16 +21,16 @@ defmodule EOD.Server.Settings do
   end
 
   defp all_enabled_regions do
-    EOD.Repo.RegionData.enabled |> EOD.Repo.all
+    EOD.Repo.RegionData.enabled() |> EOD.Repo.all()
   end
 
   defp first_valid_ip() do
-    {:ok, addresses} = :inet.getif
+    {:ok, addresses} = :inet.getif()
 
     {{ip1, ip2, ip3, ip4}, _, _} =
       Enum.find(addresses, fn
-                   {_, {0, 0, 0, 0}, _} -> false
-                   {_, _, _} -> true
+        {_, {0, 0, 0, 0}, _} -> false
+        {_, _, _} -> true
       end) || {{0, 0, 0, 0}, nil, nil}
 
     "#{ip1}.#{ip2}.#{ip3}.#{ip4}"

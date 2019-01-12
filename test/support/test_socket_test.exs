@@ -3,10 +3,10 @@ defmodule EOD.TestSocketTest do
   alias EOD.{TestSocket, Socket}
 
   setup _ do
-    {:ok, socket} = TestSocket.start_link
+    {:ok, socket} = TestSocket.start_link()
+
     {:ok,
-      server: TestSocket.set_role(socket, :server),
-      client: TestSocket.set_role(socket, :client)}
+     server: TestSocket.set_role(socket, :server), client: TestSocket.set_role(socket, :client)}
   end
 
   test "send from client to server", conn do

@@ -10,19 +10,18 @@ defmodule EOD.Packet.Server.AssignSessionTest do
   test "it can create a binary" do
     {:ok, bin} =
       %AssignSession{session_id: 7}
-      |> AssignSession.to_binary
+      |> AssignSession.to_binary()
 
     assert bin == <<7, 0>>
   end
 
   test "it can read a binary" do
-    {:ok, req} =
-      <<230, 18>> |> AssignSession.from_binary
+    {:ok, req} = <<230, 18>> |> AssignSession.from_binary()
 
     assert req.session_id == 4838
   end
 
   test "it's size is 16" do
-    assert AssignSession.packet_size == 2
+    assert AssignSession.packet_size() == 2
   end
 end

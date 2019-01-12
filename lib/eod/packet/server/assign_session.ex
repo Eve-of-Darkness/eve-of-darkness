@@ -3,8 +3,8 @@ defmodule EOD.Packet.Server.AssignSession do
   Sent to the client to assign a session id to the client.
   """
   use EOD.Packet do
-    code 0x28
+    code(0x28)
 
-    field :session_id, :little_int, size: [bytes: 2]
+    field(:session_id, :little_int, size: [bytes: 2])
   end
 end

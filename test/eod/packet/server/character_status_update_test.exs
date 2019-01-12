@@ -25,15 +25,13 @@ defmodule EOD.Packet.Server.CharacterStatusUpdateTest do
   test "it can create a binary" do
     {:ok, bin} =
       %CharStatusUpdate{is_sitting?: true, hp_percent: 100, endurance_percent: 100}
-      |> CharStatusUpdate.to_binary
+      |> CharStatusUpdate.to_binary()
 
-    assert bin == <<100, 0, 2, 100, 0, 0, 0::16, 0::16, 0::16, 0::16,
-                    0::16, 0::16, 0::16, 0::16>>
+    assert bin == <<100, 0, 2, 100, 0, 0, 0::16, 0::16, 0::16, 0::16, 0::16, 0::16, 0::16, 0::16>>
   end
 
   test "it can be created from a binary" do
-    {:ok, msg} =
-      <<100, 100, 2, 100, 0, 0, 0::64, 0::64>> |> CharStatusUpdate.from_binary
+    {:ok, msg} = <<100, 100, 2, 100, 0, 0, 0::64, 0::64>> |> CharStatusUpdate.from_binary()
 
     assert msg.is_sitting?
     assert msg.hp_percent == 100

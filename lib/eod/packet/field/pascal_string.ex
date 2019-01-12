@@ -34,14 +34,14 @@ defmodule EOD.Packet.Field.PascalString do
     case type do
       :big ->
         quote do
-          <<unquote(Macro.var(len, nil)) :: unquote(size),
-          unquote(Macro.var(name, nil)) :: bytes-size(unquote(Macro.var(len, nil)))>>
+          <<unquote(Macro.var(len, nil))::unquote(size),
+            unquote(Macro.var(name, nil))::bytes-size(unquote(Macro.var(len, nil)))>>
         end
 
       :little ->
         quote do
-          <<unquote(Macro.var(len, nil)) :: little-integer-size(unquote(size)),
-          unquote(Macro.var(name, nil)) :: bytes-size(unquote(Macro.var(len, nil)))>>
+          <<unquote(Macro.var(len, nil))::little-integer-size(unquote(size)),
+            unquote(Macro.var(name, nil))::bytes-size(unquote(Macro.var(len, nil)))>>
         end
     end
   end
@@ -63,14 +63,14 @@ defmodule EOD.Packet.Field.PascalString do
     case type do
       :big ->
         quote do
-          <<byte_size(unquote(Macro.var(name, nil))) :: unquote(size),
-          unquote(Macro.var(name, nil)) :: binary>>
+          <<byte_size(unquote(Macro.var(name, nil)))::unquote(size),
+            unquote(Macro.var(name, nil))::binary>>
         end
 
       :little ->
         quote do
-          <<byte_size(unquote(Macro.var(name, nil))) :: little-integer-size(unquote(size)),
-          unquote(Macro.var(name, nil)) :: binary>>
+          <<byte_size(unquote(Macro.var(name, nil)))::little-integer-size(unquote(size)),
+            unquote(Macro.var(name, nil))::binary>>
         end
     end
   end

@@ -9,8 +9,8 @@ defmodule EOD.Packet.Server.GameOpenReply do
     * `EOD.Packet.Client.GameOpenRequest`
   """
   use EOD.Packet do
-    code 0x2D
+    code(0x2D)
 
-    blank using: 0x00, size: [bytes: 1]
+    blank(using: 0x00, size: [bytes: 1])
   end
 end

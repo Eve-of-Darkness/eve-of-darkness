@@ -23,8 +23,9 @@ defimpl Inspect, for: EOD.Socket.TCP.ClientPacket do
     end)
     |> Enum.join("\n")
   end
+
   defp readable_data_binary(data) when is_map(data) do
-    "    #{inspect data}"
+    "    #{inspect(data)}"
   end
 
   defp packet_id(id) when is_nil(id), do: "nil"

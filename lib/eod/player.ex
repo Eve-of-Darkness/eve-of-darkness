@@ -18,10 +18,12 @@ defmodule EOD.Player do
 
   def start_link(%Character{} = character, opts \\ []) do
     client = Keyword.get(opts, :client, self())
+
     GenServer.start_link(
       Player,
       %Player{character: character, client: client},
-      opts)
+      opts
+    )
   end
 
   # GenServer Callbacks
@@ -30,8 +32,9 @@ defmodule EOD.Player do
     {:ok, state} = LivingStats.init(state)
 
     state
-    |> LivingStats.send_status_update
+    |> LivingStats.send_status_update()
     |> send_points_update()
+
     # TODO Disabled skills appear to be sent as well
 
     {:ok, state}

@@ -4,9 +4,9 @@ defimpl Inspect, for: EOD.Socket.TCP.ServerPacket do
 
     """
     %EOD.Socket.TCP.ServerPacket{
-      id: #{code && "0x"<>hex(code)}, size: #{size}
+      id: #{code && "0x" <> hex(code)}, size: #{size}
       data:
-    #{data |> IO.iodata_to_binary |> readable_data_binary}
+    #{data |> IO.iodata_to_binary() |> readable_data_binary}
       }
     """
   end

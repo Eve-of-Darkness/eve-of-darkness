@@ -36,15 +36,13 @@ defmodule EOD.Region.Manager do
       for region_data <- opts[:regions] do
         Supervisor.start_child(
           supervisor,
-          [region_data, [name: tuple_name(region_data)] ++ region_opts])
+          [region_data, [name: tuple_name(region_data)] ++ region_opts]
+        )
 
         region_data.region_id
       end
 
-    {:ok,
-      %__MODULE__{
-        region_supervisor: supervisor,
-        region_ids: region_ids}}
+    {:ok, %__MODULE__{region_supervisor: supervisor, region_ids: region_ids}}
   end
 
   def handle_call(:region_ids, _, state) do
@@ -64,13 +62,15 @@ defmodule EOD.Region.Manager do
   # Private Functions
 
   defp all_enabled_regions() do
-    EOD.Repo.RegionData.enabled |> EOD.Repo.all
+    EOD.Repo.RegionData.enabled() |> EOD.Repo.all()
   end
 
   defp start_region_supervisor() do
-    spec = Supervisor.child_spec(
-      EOD.Region,
-      start: {EOD.Region, :start_link, []})
+    spec =
+      Supervisor.child_spec(EOD.Region,
+        start: {EOD.Region, :start_link, []}
+      )
+
     Supervisor.start_link([spec], strategy: :simple_one_for_one)
   end
 
