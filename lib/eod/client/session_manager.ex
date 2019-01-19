@@ -6,12 +6,16 @@ defmodule EOD.Client.SessionManager do
   """
   use GenServer
   alias EOD.Client
+  alias EOD.Repo.Account
 
   @empty :queue.new()
 
   defstruct session_pool: @empty,
             amount_free: 0,
-            used: %{}
+            used: %{},
+            accounts: MapSet.new(),
+            account_lookup: %{},
+            monitors: MapSet.new()
 
   @doc """
   Returns a session manager which can be used to register clients.  It accepts
@@ -41,6 +45,12 @@ defmodule EOD.Client.SessionManager do
   def amount_free(pid), do: GenServer.call(pid, :amount_free)
 
   @doc """
+  Returns all accounts registered with the SessionManager as a MapSet of
+  account names
+  """
+  def accounts_registered(pid), do: GenServer.call(pid, :accounts_registered)
+
+  @doc """
   Intended to be called from inside the `EOD.Client`.  This registers the
   process with an available session id and returns it in the form of `{:ok, id}`.
   Calling this twice in the same process has no effect but to return the same
@@ -62,6 +72,35 @@ defmodule EOD.Client.SessionManager do
     end
   end
 
+  @doc """
+  Similiar to the `register/1` function; this is intended to be called inside of
+  the client process that wants to register an account to itself for the
+  SessionManager.  It can return either:
+    * `{:ok, :register}` = success
+    * `{:error, :account_already_registered}` = account already registered to
+      another process
+    * `{:error, :registered_as_different_account}` = process already has a
+      different account registered to it
+  """
+  def register_account(pid, %Account{username: username}) do
+    Registry.keys(Client.Registry, self())
+    |> Enum.find(&match?({:account, ^pid, _}, &1))
+    |> case do
+      nil ->
+        with {:ok, _} <- Registry.register(Client.Registry, {:account, pid, username}, username) do
+          GenServer.call(pid, {:register_account, self(), username})
+        else
+          {:error, {:already_registered, _}} -> {:error, :account_already_registered}
+        end
+
+      {:account, ^pid, ^username} ->
+        {:ok, :registered}
+
+      {:account, ^pid, _} ->
+        {:error, :registered_as_different_account}
+    end
+  end
+
   # GenServer Callbacks
 
   def init(opts) do
@@ -74,6 +113,33 @@ defmodule EOD.Client.SessionManager do
      }}
   end
 
+  def handle_call({:register_account, pid, acct}, _, state) do
+    cond do
+      state.account_lookup[pid] == acct ->
+        {:reply, {:ok, :registered}, state}
+
+      MapSet.member?(state.accounts, acct) ->
+        {:reply, {:error, :account_already_registered}, state}
+
+      state.account_lookup[pid] ->
+        {:reply, {:error, :registered_as_different_account}, state}
+
+      true ->
+        state = possiby_monitor_process(state, pid)
+
+        {:reply, {:ok, :registered},
+         %{
+           state
+           | accounts: MapSet.put(state.accounts, acct),
+             account_lookup: Map.put(state.account_lookup, pid, acct)
+         }}
+    end
+  end
+
+  def handle_call(:accounts_registered, _, state) do
+    {:reply, state.accounts, state}
+  end
+
   def handle_call(:amount_free, _, state) do
     {:reply, state.amount_free, state}
   end
@@ -84,8 +150,8 @@ defmodule EOD.Client.SessionManager do
         {:reply, {:error, :no_session}, state}
 
       {{:value, id}, session_pool} ->
+        state = possiby_monitor_process(state, pid)
         amount = state.amount_free - 1
-        Process.monitor(pid)
 
         {:reply, {:ok, id},
          %{
@@ -100,15 +166,50 @@ defmodule EOD.Client.SessionManager do
   def handle_call(:get_ref, _, state), do: {:reply, state.ref, state}
 
   def handle_info({:DOWN, _ref, :process, pid, _reason}, state) do
+    new_state =
+      state
+      |> release_monitor(pid)
+      |> possibly_free_session(pid)
+      |> possibly_release_account(pid)
+
+    {:noreply, new_state}
+  end
+
+  defp possiby_monitor_process(%{monitors: monitors} = state, pid) do
+    if MapSet.member?(monitors, pid) do
+      state
+    else
+      Process.monitor(pid)
+      %{state | monitors: MapSet.put(monitors, pid)}
+    end
+  end
+
+  defp release_monitor(%{monitors: monitors} = state, pid) do
+    %{state | monitors: MapSet.delete(monitors, pid)}
+  end
+
+  defp possibly_free_session(state, pid) do
     case state.used[pid] do
       nil ->
-        {:noreply, state}
+        state
 
       id ->
         pool = :queue.in(id, state.session_pool)
         amount = state.amount_free + 1
         used = Map.delete(state.used, pid)
-        {:noreply, %{state | session_pool: pool, amount_free: amount, used: used}}
+        %{state | session_pool: pool, amount_free: amount, used: used}
+    end
+  end
+
+  defp possibly_release_account(state, pid) do
+    case state.account_lookup[pid] do
+      nil ->
+        state
+
+      acct ->
+        lookup = Map.delete(state.account_lookup, pid)
+        accts = MapSet.delete(state.accounts, acct)
+        %{state | account_lookup: lookup, accounts: accts}
     end
   end
 end

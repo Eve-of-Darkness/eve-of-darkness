@@ -111,8 +111,14 @@ defmodule EOD.TestSocket do
     {:reply, :ok, %{state | waiting_clients: @empty, waiting_servers: @empty, state: :closed}}
   end
 
-  def handle_call({action, _}, _, %{state: :closed} = state) when action in [:send, :get] do
-    {:reply, {:error, :closed}, state}
+  def handle_call({action, _} = request, _, %{state: :closed} = state)
+      when action in [:send, :get] do
+    if action == :get && queued?(request, state) do
+      {msg, new_state} = pop_msg(request, state)
+      {:reply, msg, new_state}
+    else
+      {:reply, {:error, :closed}, state}
+    end
   end
 
   def handle_call({:get, :server}, from, %{client_outbox: @empty} = state) do
@@ -155,6 +161,20 @@ defmodule EOD.TestSocket do
     {{:value, server}, remaining_servers} = :queue.out(servers)
     GenServer.reply(server, msg)
     {:reply, :ok, %{state | waiting_servers: remaining_servers}}
+  end
+
+  defp queued?({:get, :server}, %{client_outbox: @empty}), do: false
+  defp queued?({:get, :client}, %{server_outbox: @empty}), do: false
+  defp queued?({:get, _}, _), do: true
+
+  defp pop_msg({:get, :server}, %{client_outbox: outbox} = state) do
+    {{:value, msg}, updated} = :queue.out(outbox)
+    {msg, %{state | client_outbox: updated}}
+  end
+
+  defp pop_msg({:get, :client}, %{server_outbox: outbox} = state) do
+    {{:value, msg}, updated} = :queue.out(outbox)
+    {msg, %{state | server_outbox: updated}}
   end
 end
 

@@ -1,5 +1,5 @@
 defmodule EOD.Client.SessionManagerTest do
-  use ExUnit.Case, async: true
+  use EOD.RepoCase, async: true
   alias EOD.Client.SessionManager, as: SM
 
   setup tags do
@@ -64,6 +64,48 @@ defmodule EOD.Client.SessionManagerTest do
       assert {:ok, 1} = manager |> SM.register()
       task = Task.async(fn -> manager |> SM.register() end)
       assert {:error, :no_session} = Task.await(task)
+    end
+  end
+
+  describe "registering an account with a client" do
+    setup tags do
+      account = build(:account, username: tags[:username] || "dudemanbro")
+      {:ok, :registered} = SM.register_account(tags[:manager], account)
+      {:ok, account: account}
+    end
+
+    test "prevents multiple dissimilar accounts", %{manager: manager} do
+      assert {:error, :registered_as_different_account} ==
+               SM.register_account(manager, build(:account, username: "rofldog"))
+    end
+
+    test "allows multiple same account registrations", %{manager: manager, account: acct} do
+      assert {:ok, :registered} = SM.register_account(manager, acct)
+    end
+
+    test "prevents different clients from using same account", %{manager: manager, account: acct} do
+      assert {:error, :account_already_registered} ==
+               fn -> SM.register_account(manager, acct) end
+               |> Task.async()
+               |> Task.await()
+    end
+
+    test "can get a MapSet of registered accounts", %{manager: manager} do
+      accounts = SM.accounts_registered(manager)
+      assert MapSet.member?(accounts, "dudemanbro")
+    end
+
+    test "registered accounts automatically are reaped", %{manager: manager} do
+      acct = build(:account, username: "rofls")
+
+      task =
+        Task.async(fn ->
+          SM.register_account(manager, acct)
+          manager |> SM.accounts_registered() |> MapSet.member?("rofls")
+        end)
+
+      assert Task.await(task)
+      refute manager |> SM.accounts_registered() |> MapSet.member?("rofls")
     end
   end
 end
