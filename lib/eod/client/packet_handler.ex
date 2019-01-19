@@ -109,13 +109,19 @@ defmodule EOD.Client.PacketHandler do
   Registers a client with the session manager.  Note that this is one of
   the few functions that cannot be chained.  It either returns the updated
   client as `{:ok, client}` or `{:error, error}`.  If the error happens to
-  be no sessions available it returns `{:error, :too_many_players_logged_in}`
+  be no sessions available it returns `{:error, :too_many_players_logged_in}`.
+  It can also error on the account being registered to another client, in
+  which case it will return `{:error, :account_already_logged_in}`.
+  It should be noted that this expects the client's account to be set already
+  in it's state.
   """
-  def register_client_session(%Client{sessions: sessions} = client) do
-    with {:ok, session_id} <- Client.SessionManager.register(sessions) do
+  def register_client_session(%Client{sessions: sessions, account: acct} = client) do
+    with {:ok, session_id} <- Client.SessionManager.register(sessions),
+         {:ok, :registered} <- Client.SessionManager.register_account(sessions, acct) do
       {:ok, %{client | session_id: session_id}}
     else
       {:error, :no_session} -> {:error, :too_many_players_logged_in}
+      {:error, :account_already_registered} -> {:error, :account_already_logged_in}
       any -> any
     end
   end

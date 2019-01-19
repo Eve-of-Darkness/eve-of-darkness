@@ -34,6 +34,12 @@ defmodule EOD.Server do
     * `settings`
       This should be an `EOD.Server.Settings` struct.  If left absent
       it will default to `EOD.Server.Settings.new/0`
+
+    * `name`
+      This is the alias pid to which the server is alias; if provided;
+      otherwise it defaults to `EOD.Server`.  You can also specify a
+      special option of `:none` which opts out of registering the pid
+      under a name
   """
   def start_link(opts \\ []) do
     ref = opts[:ref] || make_ref()
@@ -43,7 +49,8 @@ defmodule EOD.Server do
 
     GenServer.start_link(
       __MODULE__,
-      %__MODULE__{ref: ref, settings: settings, conn_manager: conn_manager}
+      %__MODULE__{ref: ref, settings: settings, conn_manager: conn_manager},
+      genserver_opts(opts)
     )
   end
 
@@ -100,6 +107,19 @@ defmodule EOD.Server do
   end
 
   # Private Functions
+
+  defp genserver_opts(opts) do
+    case opts[:name] do
+      nil ->
+        [name: EOD.Server]
+
+      :none ->
+        []
+
+      any ->
+        [name: any]
+    end
+  end
 
   defp conn_manager_opts(%{ref: ref, settings: settings}) do
     [

@@ -25,9 +25,11 @@ defmodule EOD.Client.LoginPacketHandler do
 
   def login_request(%Client{state: :handshake} = client, data) do
     with {:ok, account} <- find_or_create_account(data),
-         {:ok, registered_client} <- register_client_session(client) do
+         {:ok, registered_client} <-
+           client
+           |> set_account(account)
+           |> register_client_session() do
       registered_client
-      |> set_account(account)
       |> send_tcp(good_login_msg(data))
       |> change_state(:logged_in)
     else

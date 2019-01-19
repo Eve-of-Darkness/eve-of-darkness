@@ -23,7 +23,13 @@ defmodule EOD.PacketHandlerCase do
     server_settings = tags[:server_settings] || Server.Settings.new()
 
     {:ok, socket} = TestSocket.start_link()
-    {:ok, server} = Server.start_link(conn_manager: :disabled, settings: server_settings)
+
+    {:ok, server} =
+      Server.start_link(
+        conn_manager: :disabled,
+        settings: server_settings,
+        name: :none
+      )
 
     account = insert(:account)
 
