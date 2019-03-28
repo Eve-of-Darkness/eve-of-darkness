@@ -25,18 +25,34 @@ defmodule EOD.Socket.Listener do
     end)
   end
 
+  @doc """
+  There may be times you need to update a socket that a listener is using,
+  this is how you notify the listener process update it.  Note that it will
+  only use this new socket after the next message from the orginal socket
+  is receieved.
+  """
+  def update_socket(listener_pid, socket) do
+    send(listener_pid, {:update_socket, socket})
+  end
+
   defp listen(state) do
-    case Socket.recv(state.socket) do
-      {:ok, packet} ->
-        send(state.receiver, {state.wrap, packet})
-        listen(state)
+    receive do
+      {:update_socket, socket} ->
+        listen(%{state | socket: socket})
+    after
+      0 ->
+        case Socket.recv(state.socket) do
+          {:ok, packet} ->
+            send(state.receiver, {state.wrap, packet})
+            listen(state)
 
-      {:error, reason} when reason in [:enotconn, :closed, :ealready] ->
-        send(state.receiver, {state.wrap, :error, reason})
+          {:error, reason} when reason in [:enotconn, :closed, :ealready] ->
+            send(state.receiver, {state.wrap, :error, reason})
 
-      {:error, reason} ->
-        send(state.receiver, {state.wrap, :error, reason})
-        listen(state)
+          {:error, reason} ->
+            send(state.receiver, {state.wrap, :error, reason})
+            listen(state)
+        end
     end
   end
 end
