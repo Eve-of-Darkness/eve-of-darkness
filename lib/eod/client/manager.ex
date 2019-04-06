@@ -5,6 +5,7 @@ defmodule EOD.Client.Manager do
   """
   use GenServer
   alias EOD.Client
+  alias Client.SessionManager
 
   defstruct clients: nil,
             sessions: nil
@@ -28,13 +29,23 @@ defmodule EOD.Client.Manager do
   """
   def client_count(manager), do: GenServer.call(manager, :client_count)
 
+  @doc """
+  Returns the session manager process; which is useful to have if you need to
+  lookup and interact with connected clients directly
+  """
+  def session_manager(manager), do: GenServer.call(manager, :get_session_manager)
+
   # GenServer Callbacks
 
   def init(_) do
     with {:ok, clients} <- client_supervisor(),
-         {:ok, sessions} <- Client.SessionManager.start_link() do
+         {:ok, sessions} <- SessionManager.start_link() do
       {:ok, %__MODULE__{clients: clients, sessions: sessions}}
     end
+  end
+
+  def handle_call(:get_session_manager, _, state) do
+    {:reply, state.sessions, state}
   end
 
   def handle_call(:client_count, _, state) do

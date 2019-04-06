@@ -14,6 +14,7 @@ defmodule EOD.Client.SessionManager do
             amount_free: 0,
             used: %{},
             accounts: MapSet.new(),
+            pid_lookup: %{},
             account_lookup: %{},
             monitors: MapSet.new()
 
@@ -49,6 +50,17 @@ defmodule EOD.Client.SessionManager do
   account names
   """
   def accounts_registered(pid), do: GenServer.call(pid, :accounts_registered)
+
+  @doc """
+  Performs a lookup of a client by account name registered
+  If found returns `{:ok, client_pid}` or `{:error, :not_found}`
+
+  Note: There is no hard guarantee that the pid is alive when it
+  is returned; but it was when it was found.
+  """
+  def client_by_account(pid, account) do
+    GenServer.call(pid, {:client_by_account, account})
+  end
 
   @doc """
   Intended to be called from inside the `EOD.Client`.  This registers the
@@ -115,13 +127,13 @@ defmodule EOD.Client.SessionManager do
 
   def handle_call({:register_account, pid, acct}, _, state) do
     cond do
-      state.account_lookup[pid] == acct ->
+      state.pid_lookup[pid] == acct ->
         {:reply, {:ok, :registered}, state}
 
       MapSet.member?(state.accounts, acct) ->
         {:reply, {:error, :account_already_registered}, state}
 
-      state.account_lookup[pid] ->
+      state.pid_lookup[pid] ->
         {:reply, {:error, :registered_as_different_account}, state}
 
       true ->
@@ -131,8 +143,19 @@ defmodule EOD.Client.SessionManager do
          %{
            state
            | accounts: MapSet.put(state.accounts, acct),
-             account_lookup: Map.put(state.account_lookup, pid, acct)
+             pid_lookup: Map.put(state.pid_lookup, pid, acct),
+             account_lookup: Map.put(state.account_lookup, acct, pid)
          }}
+    end
+  end
+
+  def handle_call({:client_by_account, account}, _, state) do
+    case Map.get(state.account_lookup, account) do
+      nil ->
+        {:reply, {:error, :not_found}, state}
+
+      acct ->
+        {:reply, {:ok, acct}, state}
     end
   end
 
@@ -202,14 +225,16 @@ defmodule EOD.Client.SessionManager do
   end
 
   defp possibly_release_account(state, pid) do
-    case state.account_lookup[pid] do
+    case state.pid_lookup[pid] do
       nil ->
         state
 
       acct ->
-        lookup = Map.delete(state.account_lookup, pid)
+        p_lookup = Map.delete(state.pid_lookup, pid)
+        a_lookup = Map.delete(state.account_lookup, acct)
         accts = MapSet.delete(state.accounts, acct)
-        %{state | account_lookup: lookup, accounts: accts}
+
+        %{state | pid_lookup: p_lookup, accounts: accts, account_lookup: a_lookup}
     end
   end
 end
