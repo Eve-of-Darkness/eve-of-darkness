@@ -16,14 +16,14 @@ defmodule EOD.Client.ConnectivityPacketHandlerTest do
   end
 
   test "ping_request", context do
-    handle_packet(context, %PingRequest{timestamp: 90210})
+    handle_packet(context, %PingRequest{timestamp: 90_210})
     reply = %PingReply{} = received_packet(context)
-    assert reply.timestamp == 90210
+    assert reply.timestamp == 90_210
     assert reply.sequence == 1
   end
 
   test "acknowledge_session", context do
-    client = handle_packet(context, %AcknowledgeSession{session_id: 39837})
+    client = handle_packet(context, %AcknowledgeSession{session_id: 39_837})
     assert context.client == client
   end
 

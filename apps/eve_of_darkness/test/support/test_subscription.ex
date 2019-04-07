@@ -2,6 +2,11 @@ defmodule EOD.TestSubscription do
   use GenServer
   alias EOD.Socket.Inspector
 
+  @moduledoc """
+  This is to help test functionality around the game sockets with
+  regards to their inspection functionality
+  """
+
   @buckets [:notify, :shutdown, :unsub, :sub]
   @default_state @buckets
                  |> Enum.map(&[{:"#{&1}_logs", []}, {:"#{&1}_waiting", []}])

@@ -1,5 +1,6 @@
 defmodule EOD.RepoCase do
   use ExUnit.CaseTemplate
+  @moduledoc "Meant to be used with tests that need database functionality"
 
   using do
     quote do

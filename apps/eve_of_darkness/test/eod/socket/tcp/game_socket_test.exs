@@ -115,7 +115,7 @@ defmodule EOD.Socket.TCP.GameSocketTest do
 
       assert %HandShakeRequest{
                addons: 3,
-               build: 26885,
+               build: 26_885,
                major: 1,
                minor: 1,
                patch: 24,
@@ -144,7 +144,7 @@ defmodule EOD.Socket.TCP.GameSocketTest do
 
       assert %HandShakeRequest{
                addons: 3,
-               build: 26885,
+               build: 26_885,
                major: 1,
                minor: 1,
                patch: 24,

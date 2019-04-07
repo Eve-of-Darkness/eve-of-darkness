@@ -9,7 +9,7 @@ defmodule EOD.Packet.Client.PingRequestTest do
 
   test "it can create a binary" do
     {:ok, bin} =
-      %PingRequest{timestamp: 90210}
+      %PingRequest{timestamp: 90_210}
       |> PingRequest.to_binary()
 
     assert bin == <<0, 0, 0, 0, 0, 1, 96, 98, 0, 0, 0, 0>>
