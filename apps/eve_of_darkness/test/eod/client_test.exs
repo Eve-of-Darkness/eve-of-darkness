@@ -135,12 +135,12 @@ defmodule EOD.ClientTest do
       ping_request = %ClientPacket{
         id: :ping_request,
         sequence: 3,
-        data: %PingRequest{timestamp: 90210}
+        data: %PingRequest{timestamp: 90_210}
       }
 
       :ok = Socket.send(context.socket, ping_request)
 
-      assert {:ok, %PingReply{timestamp: 90210, sequence: 4}} == Socket.recv(context.socket)
+      assert {:ok, %PingReply{timestamp: 90_210, sequence: 4}} == Socket.recv(context.socket)
     end
   end
 end

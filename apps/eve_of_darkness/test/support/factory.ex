@@ -1,4 +1,6 @@
 defmodule EOD.Repo.Factory do
+  @moduledoc "Simple dummy data creation for tests"
+
   use ExMachina.Ecto, repo: EOD.Repo
   alias EOD.Repo.{Account, Character, RegionData}
 
@@ -26,7 +28,7 @@ defmodule EOD.Repo.Factory do
       class: 6,
       gender: 0,
       race: 1,
-      model: 20954,
+      model: 20_954,
       region: 27,
       strength: 60,
       dexterity: 75,

@@ -26,8 +26,8 @@ defmodule EOD.Server.ConnManagerTest do
   end
 
   test "sends new socket connections to host pid by default" do
-    {:ok, pid} = CM.start_link(port: 22123)
-    {:ok, port} = :gen_tcp.connect('localhost', 22123, [:binary, active: false])
+    {:ok, pid} = CM.start_link(port: 22_123)
+    {:ok, port} = :gen_tcp.connect('localhost', 22_123, [:binary, active: false])
     :gen_tcp.close(port)
     assert_receive {:new_conn, sock}
     assert is_port(sock)
@@ -36,8 +36,8 @@ defmodule EOD.Server.ConnManagerTest do
 
   test "can define a custom callback send pattern" do
     ref = make_ref()
-    {:ok, pid} = CM.start_link(port: 22124, callback: {:send, {:conn!, ref}, self()})
-    {:ok, port} = :gen_tcp.connect('localhost', 22124, [:binary, active: false])
+    {:ok, pid} = CM.start_link(port: 22_124, callback: {:send, {:conn!, ref}, self()})
+    {:ok, port} = :gen_tcp.connect('localhost', 22_124, [:binary, active: false])
     :gen_tcp.close(port)
     assert_receive {{:conn!, ^ref}, sock}
     assert is_port(sock)
@@ -45,8 +45,8 @@ defmodule EOD.Server.ConnManagerTest do
   end
 
   test "can wrap a socket before sending" do
-    {:ok, pid} = CM.start_link(port: 22125, wrap: {Wrap, :new, []})
-    {:ok, port} = :gen_tcp.connect('localhost', 22125, [:binary, active: false])
+    {:ok, pid} = CM.start_link(port: 22_125, wrap: {Wrap, :new, []})
+    {:ok, port} = :gen_tcp.connect('localhost', 22_125, [:binary, active: false])
     :gen_tcp.close(port)
     assert_receive {:new_conn, %Wrap{socket: sock}}
     assert is_port(sock)

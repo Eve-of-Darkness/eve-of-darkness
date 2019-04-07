@@ -56,7 +56,7 @@ defmodule EOD.PacketHandlerCase do
   handle_packet/2 does not return `%Client{}`, as this is the expected flow for
   all packet handlers.
   """
-  def handle_packet(%{client: client, handler: handler}, packet = %ClientPacket{}) do
+  def handle_packet(%{client: client, handler: handler}, %ClientPacket{} = packet) do
     case apply(handler, :handle_packet, [client, packet]) do
       client = %Client{} ->
         client
@@ -69,7 +69,7 @@ defmodule EOD.PacketHandlerCase do
     end
   end
 
-  def handle_packet(client_and_handler, packet = %{__struct__: module}) do
+  def handle_packet(client_and_handler, %{__struct__: module} = packet) do
     id = apply(module, :packet_id, [])
     handle_packet(client_and_handler, %ClientPacket{id: id, data: packet})
   end
