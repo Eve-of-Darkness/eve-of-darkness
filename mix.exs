@@ -4,6 +4,7 @@ defmodule Eod.MixProject do
   def project do
     [
       apps_path: "apps",
+      apps: [:eod_web_backend, :eve_of_darkness],
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
