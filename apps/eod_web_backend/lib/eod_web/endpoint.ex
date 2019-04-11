@@ -1,7 +1,7 @@
-defmodule EOD.WebWeb.Endpoint do
+defmodule EOD.Web.Endpoint do
   use Phoenix.Endpoint, otp_app: :eod_web_backend
 
-  socket "/socket", EOD.WebWeb.UserSocket,
+  socket "/socket", EOD.Web.UserSocket,
     websocket: true,
     longpoll: false
 
@@ -40,5 +40,5 @@ defmodule EOD.WebWeb.Endpoint do
     key: "_eod_web_backend_key",
     signing_salt: "jRE0ZQ8n"
 
-  plug EOD.WebWeb.Router
+  plug EOD.Web.Router
 end

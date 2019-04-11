@@ -11,10 +11,10 @@ config :eod_web_backend,
   namespace: EOD.Web
 
 # Configures the endpoint
-config :eod_web_backend, EOD.WebWeb.Endpoint,
+config :eod_web_backend, EOD.Web.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "abE0OEmvsboVWAnwU6oOBOcDCW/YPguOGmIubCYZ0/RFZcR0V8emsp0/MV1vUYFX",
-  render_errors: [view: EOD.WebWeb.ErrorView, accepts: ~w(json)],
+  render_errors: [view: EOD.Web.ErrorView, accepts: ~w(json)],
   pubsub: [name: EOD.Web.PubSub, adapter: Phoenix.PubSub.PG2]
 
 # Configures Elixir's Logger

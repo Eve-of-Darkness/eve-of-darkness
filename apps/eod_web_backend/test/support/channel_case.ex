@@ -1,4 +1,4 @@
-defmodule EOD.WebWeb.ChannelCase do
+defmodule EOD.Web.ChannelCase do
   @moduledoc """
   This module defines the test case to be used by
   channel tests.
@@ -21,7 +21,7 @@ defmodule EOD.WebWeb.ChannelCase do
       use Phoenix.ChannelTest
 
       # The default endpoint for testing
-      @endpoint EOD.WebWeb.Endpoint
+      @endpoint EOD.Web.Endpoint
     end
   end
 

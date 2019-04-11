@@ -1,12 +1,12 @@
-defmodule EOD.WebWeb do
+defmodule EOD.Web do
   @moduledoc """
   The entrypoint for defining your web interface, such
   as controllers, views, channels and so on.
 
   This can be used in your application as:
 
-      use EOD.WebWeb, :controller
-      use EOD.WebWeb, :view
+      use EOD.Web, :controller
+      use EOD.Web, :view
 
   The definitions below will be executed for every view,
   controller, etc, so keep them short and clean, focused
@@ -19,11 +19,11 @@ defmodule EOD.WebWeb do
 
   def controller do
     quote do
-      use Phoenix.Controller, namespace: EOD.WebWeb
+      use Phoenix.Controller, namespace: EOD.Web
 
       import Plug.Conn
-      import EOD.WebWeb.Gettext
-      alias EOD.WebWeb.Router.Helpers, as: Routes
+      import EOD.Web.Gettext
+      alias EOD.Web.Router.Helpers, as: Routes
     end
   end
 
@@ -31,14 +31,14 @@ defmodule EOD.WebWeb do
     quote do
       use Phoenix.View,
         root: "lib/eod_web_backend_web/templates",
-        namespace: EOD.WebWeb
+        namespace: EOD.Web
 
       # Import convenience functions from controllers
       import Phoenix.Controller, only: [get_flash: 1, get_flash: 2, view_module: 1]
 
-      import EOD.WebWeb.ErrorHelpers
-      import EOD.WebWeb.Gettext
-      alias EOD.WebWeb.Router.Helpers, as: Routes
+      import EOD.Web.ErrorHelpers
+      import EOD.Web.Gettext
+      alias EOD.Web.Router.Helpers, as: Routes
     end
   end
 
@@ -53,7 +53,7 @@ defmodule EOD.WebWeb do
   def channel do
     quote do
       use Phoenix.Channel
-      import EOD.WebWeb.Gettext
+      import EOD.Web.Gettext
     end
   end
 
