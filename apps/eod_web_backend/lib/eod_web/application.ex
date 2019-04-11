@@ -9,7 +9,7 @@ defmodule EOD.Web.Application do
     # List all child processes to be supervised
     children = [
       # Start the endpoint when the application starts
-      EOD.WebWeb.Endpoint
+      EOD.Web.Endpoint
       # Starts a worker by calling: EOD.Web.Worker.start_link(arg)
       # {EOD.Web.Worker, arg},
     ]
@@ -23,7 +23,7 @@ defmodule EOD.Web.Application do
   # Tell Phoenix to update the endpoint configuration
   # whenever the application is updated.
   def config_change(changed, _new, removed) do
-    EOD.WebWeb.Endpoint.config_change(changed, removed)
+    EOD.Web.Endpoint.config_change(changed, removed)
     :ok
   end
 end

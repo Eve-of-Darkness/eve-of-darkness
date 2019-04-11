@@ -1,7 +1,9 @@
-defmodule EOD.WebWeb.ClientChannel do
+defmodule EOD.Web.ClientChannel do
   @moduledoc """
   This is responsible for interacting with the game clients as well
   as getting general information on the clients from the game server
+
+  See Also: `EOD.Web.ClientController`
   """
 
   use Phoenix.Channel

@@ -1,5 +1,5 @@
-defmodule EOD.WebWeb.ErrorView do
-  use EOD.WebWeb, :view
+defmodule EOD.Web.ErrorView do
+  use EOD.Web, :view
 
   # If you want to customize a particular status code
   # for a certain format, you may uncomment below.
