@@ -8,3 +8,5 @@ config :eod_web_backend, EOD.Web.Endpoint,
 
 # Print only warnings and errors during test
 config :logger, level: :warn
+
+config :cortex, enabled: {:system, "CORTEX_ENABLED", true}

@@ -21,6 +21,12 @@ defmodule EOD.Web.Endpoint do
     plug Phoenix.CodeReloader
   end
 
+  # CORS will not be handled by the prod server
+  # This is just for local development / testing
+  if Mix.env() == :dev do
+    plug CORSPlug
+  end
+
   plug Plug.RequestId
   plug Plug.Logger
 

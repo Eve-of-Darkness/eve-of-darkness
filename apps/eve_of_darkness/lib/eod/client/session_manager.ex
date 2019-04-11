@@ -113,6 +113,13 @@ defmodule EOD.Client.SessionManager do
     end
   end
 
+  @doc """
+  Quick way to get the number of accounts that are currently registered
+  with the session manager.  This number should be assumed to be the number
+  of accounts that authenticated correctly and are currently connected.
+  """
+  def registered_accounts_count(pid), do: GenServer.call(pid, :get_accounts_count)
+
   # GenServer Callbacks
 
   def init(opts) do
@@ -123,6 +130,10 @@ defmodule EOD.Client.SessionManager do
        session_pool: session_pool,
        amount_free: session_pool |> :queue.len()
      }}
+  end
+
+  def handle_call(:get_accounts_count, _, state) do
+    {:reply, MapSet.size(state.accounts), state}
   end
 
   def handle_call({:register_account, pid, acct}, _, state) do
