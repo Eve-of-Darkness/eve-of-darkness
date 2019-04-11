@@ -4,7 +4,7 @@ elixir:
 otp_release:
   - '21.0'
 env:
-  - MIX_ENV=test
+  - MIX_ENV=test CORTEX_ENABLED=false
 install:
   - mix local.rebar --force
   - mix local.hex --force

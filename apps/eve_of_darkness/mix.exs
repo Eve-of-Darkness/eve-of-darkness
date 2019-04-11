@@ -44,6 +44,9 @@ defmodule EOD.Mixfile do
       {:comeonin, "~> 4.0"},
       {:pbkdf2_elixir, "~> 0.12"},
 
+      # Dev Only Deps
+      {:cortex, "~> 0.1", only: [:dev, :test]},
+
       # Test Only Dependencies
       {:ex_machina, "~> 2.2", only: :test},
       {:credo, "~> 0.8", only: [:dev, :test], runtime: false}
