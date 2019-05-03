@@ -3,6 +3,7 @@ defmodule EOD.Web.UserSocket do
 
   ## Channels
   channel "clients", EOD.Web.ClientChannel
+  channel "clients:*", EOD.Web.ClientDetailChannel
 
   # Socket params are passed from the client and can
   # be used to verify and authenticate a user. After

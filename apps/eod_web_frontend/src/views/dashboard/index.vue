@@ -1,12 +1,18 @@
 <template>
-  <div class="dashboard-container" />
+  <div class="dashboard-container">
+    <overview-panel />
+  </div>
 </template>
 
 <script>
 import { mapGetters } from 'vuex'
+import OverviewPanel from '../../components/OverviewPanel'
 
 export default {
   name: 'Dashboard',
+  components: {
+    OverviewPanel
+  },
   computed: {
     ...mapGetters([
       'name'

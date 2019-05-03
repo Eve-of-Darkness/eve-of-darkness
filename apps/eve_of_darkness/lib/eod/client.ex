@@ -21,7 +21,8 @@ defmodule EOD.Client do
             selected_realm: :none,
             selected_character: :none,
             player: :none,
-            characters: []
+            characters: [],
+            started_at: DateTime.utc_now()
 
   def start_link(%__MODULE__{} = init_state) do
     GenServer.start_link(__MODULE__, init_state)
@@ -34,6 +35,12 @@ defmodule EOD.Client do
   def send_message(pid, message) do
     GenServer.cast(pid, {:send_message, message})
   end
+
+  @doc """
+  Returns an internal state snapshot of the client; which may be useful
+  for quickly gleaning lots of information on the connected client.
+  """
+  def get_state(pid), do: GenServer.call(pid, :get_state)
 
   @doc """
   Only useful in testing, this forces the client to share the same transaction
@@ -51,6 +58,7 @@ defmodule EOD.Client do
      state
      |> Map.put(:client, self())
      |> Map.put(:ref, make_ref())
+     |> Map.put(:started_at, DateTime.utc_now())
      |> begin_listener}
   end
 
@@ -62,6 +70,10 @@ defmodule EOD.Client do
   def handle_call({:share_test_transaction, pid}, _, state) do
     Ecto.Adapters.SQL.Sandbox.allow(EOD.Repo, pid, self())
     {:reply, :ok, state}
+  end
+
+  def handle_call(:get_state, _, state) do
+    {:reply, state, state}
   end
 
   def handle_info({{:game_packet, ref}, packet}, %{ref: ref} = state) do

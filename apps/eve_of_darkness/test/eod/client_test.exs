@@ -44,6 +44,13 @@ defmodule EOD.ClientTest do
       :ok
     end
 
+    test "#get_state/1", context do
+      state = Client.get_state(context.client)
+      assert state.state == :handshake
+      assert state.version == %{build: 1982, major: 1, minor: 1, patch: 24, rev: 92}
+      assert %Client{} = state
+    end
+
     test "login process happy path where account is created", context do
       login_request = %ClientPacket{
         id: :login_request,

@@ -43,9 +43,12 @@ defmodule EOD.Web.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
 
+      # Custom Required Libs
+      {:guardian, "~> 1.0"},
+
       # Dev Only Deps
       {:cortex, "~> 0.1", only: [:dev, :test]},
-      {:cors_plug, "~> 1.5", only: :dev}
+      {:cors_plug, "~> 2.0", only: :dev}
     ]
   end
 end
