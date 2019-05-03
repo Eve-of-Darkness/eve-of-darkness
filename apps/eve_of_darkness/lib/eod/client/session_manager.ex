@@ -63,6 +63,18 @@ defmodule EOD.Client.SessionManager do
   end
 
   @doc """
+  Similiar to `client_by_account/2`; but optimized to fetch a list of client
+  pids from a collection of accounts in a single lookup.  The list returned
+  takes the format of every lookup being a three element tuple with:
+
+  `{:ok, account_name, pid}` - client found for account
+  `{:error, :not_found, account_name}` - client not found
+  """
+  def clients_by_accounts(pid, accounts) do
+    GenServer.call(pid, {:clients_by_accounts, accounts})
+  end
+
+  @doc """
   Intended to be called from inside the `EOD.Client`.  This registers the
   process with an available session id and returns it in the form of `{:ok, id}`.
   Calling this twice in the same process has no effect but to return the same
@@ -168,6 +180,21 @@ defmodule EOD.Client.SessionManager do
       acct ->
         {:reply, {:ok, acct}, state}
     end
+  end
+
+  def handle_call({:clients_by_accounts, accounts}, _, state) do
+    reply =
+      Enum.reduce(accounts, [], fn account, lookups ->
+        case Map.get(state.account_lookup, account) do
+          nil ->
+            [{:error, :not_found, account} | lookups]
+
+          client_pid ->
+            [{:ok, account, client_pid} | lookups]
+        end
+      end)
+
+    {:reply, reply, state}
   end
 
   def handle_call(:accounts_registered, _, state) do

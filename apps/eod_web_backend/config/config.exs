@@ -10,6 +10,10 @@ use Mix.Config
 config :eod_web_backend,
   namespace: EOD.Web
 
+config :eod_web_backend, EOD.Web.Guardian,
+  issuer: "eod_web_backend",
+  secret_key: "+O1HqEB86yXQkqqHKmcedPtdzqvQwF0CRBachsHTMOx+fI4g+cL4cPkYe4H3xaBA"
+
 # Configures the endpoint
 config :eod_web_backend, EOD.Web.Endpoint,
   url: [host: "localhost"],

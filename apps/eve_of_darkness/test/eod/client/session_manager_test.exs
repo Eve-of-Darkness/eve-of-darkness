@@ -95,6 +95,12 @@ defmodule EOD.Client.SessionManagerTest do
       assert MapSet.member?(accounts, "dudemanbro")
     end
 
+    test "getting multiple clients by accounts at a time", %{manager: manager} do
+      clients = SM.clients_by_accounts(manager, ~w(dudemanbro jimmyjones))
+      assert {:ok, "dudemanbro", self()} in clients
+      assert {:error, :not_found, "jimmyjones"} in clients
+    end
+
     test "registered accounts automatically are reaped", %{manager: manager} do
       acct = build(:account, username: "rofls")
 
