@@ -32,6 +32,12 @@
         </template>
       </el-table-column>
 
+      <el-table-column align="center" label="Options">
+        <template slot-scope="scope">
+          <el-button type="primary" @click="$router.push(`/clients/${scope.row.account_name}`)">Inspect</el-button>
+        </template>
+      </el-table-column>
+
     </el-table>
   </div>
 </template>
@@ -64,7 +70,6 @@ export default {
     })
 
     this.channel.join()
-      .receive('ok', resp => { console.log('connected to clients channel') })
       .receive('error', resp => { console.log('unable to connect to clients channel') })
   },
 

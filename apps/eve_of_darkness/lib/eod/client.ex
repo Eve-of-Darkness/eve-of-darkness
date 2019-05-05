@@ -6,6 +6,7 @@ defmodule EOD.Client do
   """
   use GenServer
   alias EOD.Client
+  alias EOD.Socket.TCP
   require Logger
 
   defstruct tcp_socket: nil,
@@ -51,6 +52,16 @@ defmodule EOD.Client do
     GenServer.call(pid, {:share_test_transaction, self()})
   end
 
+  @doc """
+  This adds a subscription to the tcp socket of the client.
+
+  See: EOD.Socket.Inspector
+       EOD.Socket.Inspector.Subscription
+  """
+  def add_packet_subscription(pid, sub) do
+    GenServer.cast(pid, {:add_packet_subscription, sub})
+  end
+
   # GenServer Callbacks
 
   def init(state) do
@@ -65,6 +76,26 @@ defmodule EOD.Client do
   def handle_cast({:send_message, message}, state) do
     state.tcp_socket |> EOD.Socket.send(message)
     {:noreply, state}
+  end
+
+  def handle_cast({:add_packet_subscription, subscription}, state) do
+    # TODO Once an inspector is added to the socket it never goes away -
+    # this will probably grow out of hand if used for more then simple
+    # debugging; probably should add some kind of expire to the inspector?
+    %{tcp_socket: socket, tcp_listener: listen} = state
+
+    case socket.inspector do
+      false ->
+        {:ok, inspector} = EOD.Socket.Inspector.start_link()
+        {:ok, inspected_socket} = TCP.GameSocket.add_inspector(socket, inspector)
+        EOD.Socket.Listener.update_socket(listen, inspected_socket)
+        EOD.Socket.Inspector.subscribe(inspector, subscription)
+        {:noreply, %{state | tcp_socket: inspected_socket}}
+
+      inspector ->
+        EOD.Socket.Inspector.subscribe(inspector, subscription)
+        {:noreply, state}
+    end
   end
 
   def handle_call({:share_test_transaction, pid}, _, state) do

@@ -60,10 +60,17 @@ export const constantRoutes = [
     component: Layout,
     children: [
       {
-        path: 'index',
+        path: '',
         name: 'Clients',
         component: () => import('@/views/clients/index'),
         meta: { title: 'Clients', icon: 'peoples' }
+      },
+      {
+        path: ':username',
+        name: 'Client Detail',
+        hidden: true,
+        component: () => import('@/views/clients/detail'),
+        meta: { title: 'Client Detail' }
       }
     ]
   },
