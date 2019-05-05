@@ -18,6 +18,7 @@ defmodule EOD.Web.Router do
   scope "/api", EOD.Web do
     pipe_through [:api, :auth]
     get "/clients", ClientController, :index
+    get "/clients/:id", ClientController, :show
 
     # Authentication
     post "/auth/login", AuthController, :login

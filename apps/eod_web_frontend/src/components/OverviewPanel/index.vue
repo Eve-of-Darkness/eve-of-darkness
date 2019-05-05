@@ -62,7 +62,6 @@ export default {
     })
 
     this.channel.join()
-      .receive('ok', resp => { console.log('connected to clients channel') })
       .receive('error', resp => { console.log('unable to connect to clients channel') })
   },
 
