@@ -87,6 +87,7 @@ defmodule EOD.Packet do
   <<"mark", 0::48, "mill", 0::48, 22:8>>
   |> Person.from_binary
   #=> %Person{first_name: "mark", last_name: "mill", age: 22}
+  ```
   """
   defmacro field(name, type, opts \\ []) do
     type = convert_known_types(type)
@@ -104,6 +105,25 @@ defmodule EOD.Packet do
   ```elixir
   # blank our four bytes with 0's
   blank using: 0x00, size: [bytes: 4]
+  ```
+
+  There may also be a time for matching when you expect this blank unused
+  field to be exactly a specific value; this is useful for instance as a header
+  match for an assorted list.  Where you want to skip out if a known sequence
+  for one of multiple substructures is possible. In the following example if the
+  first encountered byte is exactly zero for each match it will match to
+  `%Nothing{}`, without the `match_exactly?` option it would always match the
+  first three bytes and never attempt to fill a `%Widget{}`
+
+  ```elixir
+  defmodule FixedAssorted do
+    use EOD.Packet do
+      structure Widget, do: field(:name, :pascal_string)
+      structure Nothing, do: blank(using: 0x00, size: [bytes: 1], match_exactly?: true)
+
+      list(:widgets, [Nothing, Widget], size: 3)
+    end
+  end
   ```
   """
   defmacro blank(opts) do
@@ -247,6 +267,53 @@ defmodule EOD.Packet do
     end
   end
 
+  @doc """
+  A list is a way match a substructure defined for a packet either a specific or
+  dynamic number of times.  For matching purposes a size is required of either
+  `:dynamic` or the number of elements you expect.
+
+  ```elixir
+  defmodule Dynamic do
+    use EOD.Packet do
+      structure Widget do
+        field(:name, :pascal_string)
+      end
+
+      list(:widgets, Widget, size: :dynamic)
+    end
+  end
+  ```
+
+  ```elixir
+  defmodule Fixed do
+    use EOD.Packet do
+      structure Widget do
+        field(:name, :pascal_string)
+      end
+
+      list(:widgets, Widget, size: 3)
+    end
+  end
+  ```
+
+  You may also pass for the second parameter a list of structures; if done this
+  way it will attempt to build an assorted list; matching against each type in
+  the order provided.  In the following example it will first try to match a
+  blank byte to `%Nothing{}` or a pascal string for `%Widget{}`.  Take care when
+  using this; as you can quickly get into a senario with a bad match and enter
+  a state where the substructures are wrong...
+
+  ```elixir
+  defmodule FixedAssorted do
+    use EOD.Packet do
+      structure Widget, do: field(:name, :pascal_string)
+      structure Nothing, do: blank(using: 0x00, size: [bytes: 1], match_exactly?: true)
+
+      list(:widgets, [Nothing, Widget], size: 3)
+    end
+  end
+  ```
+  """
   defmacro list(name, struct, opts) do
     alias EOD.Packet.Field
 

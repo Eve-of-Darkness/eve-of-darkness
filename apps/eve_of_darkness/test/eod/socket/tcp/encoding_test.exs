@@ -26,7 +26,7 @@ defmodule EOD.Socket.TCP.EncodingTest do
   end
 
   test ":handshake_response" do
-    handshake_resp = %HandshakeResponse{type: 6, version: "1.124"}
+    handshake_resp = %HandshakeResponse{version: "1.124"}
     {:ok, bin} = HandshakeResponse.to_binary(handshake_resp)
 
     expected = {:ok, %SP{code: 0x22, data: [bin]}}

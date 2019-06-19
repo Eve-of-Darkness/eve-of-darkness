@@ -3,6 +3,11 @@ defmodule EOD.Packet.Field.PascalString do
   Pascal string packet field.  This supports an option of `:type` which can be
   either `:big` or `:little`, and defaults to `:big`.  The size of a pascal string
   defines how big the header is for the string size.
+
+  Another option; and somewhat odd that it is needed; is you can optionally specify
+  if the pascal string should be null terminated. By default this is false; however,
+  if set to true it will pad the string with an `0x00` byte and ensure that the size
+  of the string reflects this null termination chacaracter.
   """
   use EOD.Packet.Field
   import EOD.Packet.OptSize
@@ -15,6 +20,15 @@ defmodule EOD.Packet.Field.PascalString do
     end
 
     {name, default}
+  end
+
+  def from_binary_process({name, opts}) do
+    if Keyword.get(opts, :null_terminated, false) do
+      quote do
+        unquote(Macro.var(name, nil)) =
+          EOD.Packet.Field.CString.read_string(unquote(Macro.var(name, nil)))
+      end
+    end
   end
 
   def from_binary_match({name, opts}) do
@@ -59,18 +73,31 @@ defmodule EOD.Packet.Field.PascalString do
   def to_binary_bin({name, opts}) do
     size = number_size_opt(name, opts)
     type = Keyword.get(opts, :type, :big)
+    null = Keyword.get(opts, :null_terminated, false)
 
-    case type do
-      :big ->
+    case {type, null} do
+      {:big, true} ->
+        quote do
+          <<byte_size(unquote(Macro.var(name, nil))) + 1::unquote(size),
+            unquote(Macro.var(name, nil))::binary, 0::8>>
+        end
+
+      {:big, false} ->
         quote do
           <<byte_size(unquote(Macro.var(name, nil)))::unquote(size),
             unquote(Macro.var(name, nil))::binary>>
         end
 
-      :little ->
+      {:little, false} ->
         quote do
           <<byte_size(unquote(Macro.var(name, nil)))::little-integer-size(unquote(size)),
             unquote(Macro.var(name, nil))::binary>>
+        end
+
+      {:little, true} ->
+        quote do
+          <<byte_size(unquote(Macro.var(name, nil))) + 1::little-integer-size(unquote(size)),
+            unquote(Macro.var(name, nil))::binary, 0::8>>
         end
     end
   end

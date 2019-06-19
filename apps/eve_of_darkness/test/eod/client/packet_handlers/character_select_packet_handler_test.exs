@@ -97,8 +97,7 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
       char_ids = context.client.characters |> Enum.map(& &1.id)
       assert [context.alb.id] == char_ids
       assert %Realm{realm: :albion} = received_packet(context)
-      assert %CharOverviewResp{characters: [char | _]} = resp = received_packet(context)
-      assert resp.username == context.account.username
+      assert %CharOverviewResp{characters: [char | _]} = received_packet(context)
       assert char.name == context.alb.name
     end
 
@@ -107,8 +106,7 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
       char_ids = context.client.characters |> Enum.map(& &1.id)
       assert [context.mid.id] == char_ids
       assert %Realm{realm: :midgard} = received_packet(context)
-      assert %CharOverviewResp{characters: [char | _]} = resp = received_packet(context)
-      assert resp.username == context.account.username
+      assert %CharOverviewResp{characters: [char | _]} = received_packet(context)
       assert char.name == context.mid.name
     end
 
@@ -117,8 +115,7 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
       char_ids = context.client.characters |> Enum.map(& &1.id)
       assert [context.hib.id] == char_ids
       assert %Realm{realm: :hibernia} = received_packet(context)
-      assert %CharOverviewResp{characters: [char | _]} = resp = received_packet(context)
-      assert resp.username == context.account.username
+      assert %CharOverviewResp{characters: [char | _]} = received_packet(context)
       assert char.name == context.hib.name
     end
   end
@@ -127,18 +124,34 @@ defmodule EOD.Client.CharacterSelectPacketHandlerTest do
     alias EOD.Packet.Client.CharacterCrudRequest, as: CharCrudReq
 
     setup tags do
-      {:ok, client: %{tags.client | selected_realm: :albion}}
+      if tags[:character] do
+        insert(:character, Keyword.merge([account: tags.client.account], tags[:character]))
+      end
+
+      {:ok, client: %{tags.client | selected_realm: tags[:realm] || :albion}}
     end
 
-    test "creating a character", context do
-      blanks = 1..9 |> Enum.map(fn _ -> %CharCrudReq.Character{action: :create} end)
+    @tag realm: :albion
+    test "creating a character in albion", context do
+      packet = %CharCrudReq{action: :create, name: "ben", slot: 0, realm: 1}
+      client = handle_packet(context, packet)
+      [char] = client.characters
+      assert char.name == "ben"
+      assert char.slot == 0
+    end
 
-      ben =
-        params_for(:character, name: "ben")
-        |> Enum.reduce(%CharCrudReq.Character{}, fn {k, v}, char -> Map.put(char, k, v) end)
-        |> Map.put(:action, :create)
+    @tag realm: :midgard
+    test "creating a character in midgard", context do
+      packet = %CharCrudReq{action: :create, name: "ben", slot: 12, realm: 2}
+      client = handle_packet(context, packet)
+      [char] = client.characters
+      assert char.name == "ben"
+      assert char.slot == 2
+    end
 
-      packet = %CharCrudReq{characters: [ben | blanks]}
+    @tag realm: :hibernia
+    test "creating a character in hibernia", context do
+      packet = %CharCrudReq{action: :create, name: "ben", slot: 20, realm: 3}
       client = handle_packet(context, packet)
       [char] = client.characters
       assert char.name == "ben"
