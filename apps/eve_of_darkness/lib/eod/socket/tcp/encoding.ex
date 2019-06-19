@@ -36,6 +36,14 @@ defmodule EOD.Socket.TCP.Encoding do
     def decode(%ClientPacket{id: unquote(code)} = packet) do
       with {:ok, data} <- unquote(c_packet).from_binary(packet.data) do
         {:ok, %{packet | data: data, id: unquote(id)}}
+      else
+        {:error, {:no_match, unquote(c_packet)}} = error ->
+          Logger.error("""
+          Could not decode for #{unquote(c_packet)}
+          #{inspect(packet)}
+          """)
+
+          error
       end
     end
   end

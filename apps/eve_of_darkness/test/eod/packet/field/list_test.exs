@@ -75,4 +75,35 @@ defmodule EOD.Packet.Field.ListTest do
       assert dynamic.widgets == []
     end
   end
+
+  defmodule FixedAssorted do
+    use EOD.Packet do
+      structure(Widget, do: field(:name, :pascal_string))
+      structure(Nothing, do: blank(using: 0x00, size: [bytes: 1], match_exactly?: true))
+
+      list(:widgets, [Nothing, Widget], size: 3)
+    end
+  end
+
+  describe "Fixed assorted list" do
+    alias FixedAssorted.{Widget, Nothing}
+
+    test "should be filled by size at default with the first provided structure" do
+      structure = %FixedAssorted{}
+      assert structure.widgets == [%Nothing{}, %Nothing{}, %Nothing{}]
+    end
+
+    test "It can generate a binary" do
+      structure = %FixedAssorted{widgets: [%Nothing{}, %Widget{name: "foo"}, %Nothing{}]}
+      assert {:ok, <<0, 3, 102, 111, 111, 0>>} == structure |> FixedAssorted.to_binary()
+    end
+
+    test "It can read from a binary" do
+      {:ok, structure} =
+        <<0, 3, 102, 111, 111, 0>>
+        |> FixedAssorted.from_binary()
+
+      assert structure == %FixedAssorted{widgets: [%Nothing{}, %Widget{name: "foo"}, %Nothing{}]}
+    end
+  end
 end

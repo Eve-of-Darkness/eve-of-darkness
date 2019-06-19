@@ -14,7 +14,7 @@ defmodule EOD.Packet.Client.LoginRequest do
     id(:login_request)
 
     blank(using: 0x00, size: [bytes: 7])
-    field(:username, :pascal_string, type: :little, size: 2)
-    field(:password, :pascal_string, type: :little, size: 2)
+    field(:username, :pascal_string, type: :little, size: 4, null_terminated: true)
+    field(:password, :pascal_string, type: :little, size: 4, null_terminated: true)
   end
 end

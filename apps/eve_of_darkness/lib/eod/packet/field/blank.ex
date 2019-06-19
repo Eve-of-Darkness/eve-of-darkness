@@ -15,9 +15,16 @@ defmodule EOD.Packet.Field.Blank do
 
   def from_binary_match({_, opts}) do
     size = number_size_opt(:blank, opts)
+    using = Keyword.get(opts, :using, 0)
 
-    quote do
-      _ :: unquote(size)
+    if Keyword.get(opts, :match_exactly?, false) do
+      quote do
+        unquote(using) :: unquote(size)
+      end
+    else
+      quote do
+        _ :: unquote(size)
+      end
     end
   end
 

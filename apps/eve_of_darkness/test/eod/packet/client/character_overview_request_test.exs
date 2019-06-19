@@ -4,24 +4,20 @@ defmodule EOD.Packet.Client.CharacterOverviewRequestTest do
 
   test "it works like a struct" do
     req = %CharacterOverviewRequest{}
-    assert req.username == ""
     assert req.realm == :none
   end
 
   test "it can convert to binary" do
     {:ok, bin} =
-      %CharacterOverviewRequest{username: "ben", realm: :albion}
+      %CharacterOverviewRequest{realm: :albion}
       |> CharacterOverviewRequest.to_binary()
 
-    assert bin == String.pad_trailing("ben-S", 28, <<0>>)
+    assert bin == <<1>>
   end
 
   test "it can convert from a binary" do
-    {:ok, req} =
-      String.pad_trailing("ben-S", 28, <<0>>)
-      |> CharacterOverviewRequest.from_binary()
+    {:ok, req} = CharacterOverviewRequest.from_binary(<<3>>)
 
-    assert req.username == "ben"
-    assert req.realm == :albion
+    assert req.realm == :hibernia
   end
 end

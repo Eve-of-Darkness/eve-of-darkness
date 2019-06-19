@@ -13,13 +13,13 @@ defmodule EOD.Packet.Client.CharacterSelectRequestTest do
       |> CharacterSelectRequest.to_binary()
 
     assert bin ==
-             <<0, 0, 0, 0, 0, "cheesepicklesonions", 0, 0, 0, 0, 0>> <>
-               String.duplicate(<<0>>, 75)
+             <<0, 0, "cheesepicklesonions", 0, 0, 0, 0, 0>> <>
+               String.duplicate(<<0>>, 6)
   end
 
   test "it can create a struct from a binary" do
     {:ok, req} =
-      (<<0::40, "cheesepicklesonions">> <> String.duplicate(<<0>>, 80))
+      (<<0, 0, "cheesepicklesonions", 0, 0, 0, 0, 0>> <> String.duplicate(<<0>>, 6))
       |> CharacterSelectRequest.from_binary()
 
     assert req.char_name == "cheesepicklesonions"

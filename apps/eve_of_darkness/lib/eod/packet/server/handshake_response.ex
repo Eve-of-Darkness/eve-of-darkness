@@ -3,17 +3,18 @@ defmodule EOD.Packet.Server.HandshakeResponse do
   This is the packet returned by the server which follows
   up the `EOD.Packet.Client.HandShakeRequest` packet sent
   by it.  Something of note: while the client sends it's
-  version out in different interger bytes; it expects the
-  main part of the version back as a 5 byte string; ie:
-  `1.124`
+  version out in different integer bytes; it expects the
+  main part of the version back as a little pascal string
+  that is null terminated.
+
+  It is unclear what the last two bytes do in this packet
+  but they are needed.
   """
   use EOD.Packet do
     code(0x22)
 
-    field(:type, :integer, size: [bytes: 1])
+    field(:version, :pascal_string, size: 4, type: :little, null_terminated: true)
     blank(using: 0x00, size: [bytes: 1])
-    field(:version, :string, size: [bytes: 5])
-    field(:rev, :integer, size: [bytes: 1])
-    field(:build, :integer, size: [bytes: 2])
+    blank(using: 0x00, size: [bytes: 1])
   end
 end

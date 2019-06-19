@@ -29,16 +29,16 @@ defmodule EOD.ClientTest do
         data: %HandShakeRequest{
           major: 1,
           minor: 1,
-          patch: 24,
+          patch: 25,
           type: 6,
-          rev: 92,
+          rev: 100,
           build: 1982
         }
       }
 
       :ok = Socket.send(context.socket, handshake_request)
 
-      assert {:ok, %HandshakeResponse{type: 6, version: "1.124", rev: 92, build: 1982}} ==
+      assert {:ok, %HandshakeResponse{version: "1.125d"}} ==
                Socket.recv(context.socket)
 
       :ok
@@ -47,7 +47,7 @@ defmodule EOD.ClientTest do
     test "#get_state/1", context do
       state = Client.get_state(context.client)
       assert state.state == :handshake
-      assert state.version == %{build: 1982, major: 1, minor: 1, patch: 24, rev: 92}
+      assert state.version == %{build: 1982, major: 1, minor: 1, patch: 25, rev: 100}
       assert %Client{} = state
     end
 

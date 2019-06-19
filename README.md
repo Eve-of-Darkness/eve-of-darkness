@@ -8,7 +8,7 @@ flexibility and scalability.
 
 ## Development Requirements
 
- * Elixir 1.7.3
+ * Elixir 1.8.0
  * NodeJS 10.15.3
  * PostgreSQL 10+
 

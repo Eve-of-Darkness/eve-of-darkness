@@ -70,49 +70,77 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
   end
 
   @doc """
-  Not fully happy with the protocol that happens betwee the client and
-  server; but it is what it is.  The client sends all of the characters
-  it knows about in it's slot locations.  You have to use this information
-  as well as the `:action` hint to decide what characters to create or
-  delete.
+  The client sends a crud request for characters.  One of the interesting
+  things here is the slot number given is different for each realm.  We
+  however do processing on them to keep them all uniform from slot 0-9 no
+  matter what realm they are in.
   """
-  def char_crud_request(client, %{characters: [%{action: :create} | _]} = packet) do
-    packet.characters
-    |> Enum.with_index()
-    |> Enum.map(fn {char, index} -> Map.put(char, :slot, index) end)
-    |> Enum.filter(&(&1.name != ""))
-    |> Enum.each(fn char ->
-      unless Enum.any?(client.characters, &(&1.slot == char.slot)) do
-        Map.merge(char, %{account_id: client.account.id})
-        |> Map.from_struct()
-        |> Character.new()
-        |> EOD.Repo.insert()
-      end
-    end)
+  def char_crud_request(client, %{action: :create} = packet) do
+    packet
+    |> as_character_params(client)
+    |> Character.new()
+    |> EOD.Repo.insert!()
 
     client
     |> load_characters
     |> send_tcp(&char_overview_msg(&1))
   end
 
-  def char_crud_request(client, %{characters: [%{action: :delete} | _]} = packet) do
-    packet_characters =
-      Enum.with_index(packet.characters)
-      |> Enum.map(fn {char, index} -> Map.put(char, :slot, index) end)
+  def char_crud_request(client, %{action: :delete} = packet) do
+    params = as_character_params(packet, client)
 
-    client.characters
-    |> Enum.each(fn char ->
-      if Enum.any?(packet_characters, &(&1.slot == char.slot && &1.name == "")) do
-        EOD.Repo.delete(char)
-      end
-    end)
+    case Enum.find(client.characters, &(&1.slot == params.slot)) do
+      nil ->
+        client
 
-    client
-    |> load_characters
-    |> send_tcp(&char_overview_msg(&1))
+      character ->
+        EOD.Repo.delete!(character)
+
+        client
+        |> load_characters
+        |> send_tcp(&char_overview_msg(&1))
+    end
+  end
+
+  @update_actions [:update_cosmetics, :update_attributes, :update_attributes_and_cosmetics]
+  def char_crud_request(client, %{action: action} = packet) when action in @update_actions do
+    params = as_character_params(packet, client)
+
+    case Enum.find(client.characters, &(&1.slot == params.slot)) do
+      nil ->
+        client
+
+      character ->
+        Character.changeset(character, params)
+        |> EOD.Repo.update!()
+
+        client
+        |> load_characters
+        |> send_tcp(&char_overview_msg(&1))
+    end
   end
 
   # Private Methods
+
+  @hibernia 3
+  @midgard 2
+  @albion 1
+  @unknown 0
+  defp as_character_params(packet, client) do
+    packet
+    |> Map.from_struct()
+    |> Map.merge(%{account_id: client.account.id})
+    |> case do
+      %{realm: @midgard, slot: slot} = params ->
+        %{params | slot: slot - 10}
+
+      %{realm: @hibernia, slot: slot} = params ->
+        %{params | slot: slot - 20}
+
+      %{realm: realm} = params when realm in [@albion, @unknown] ->
+        params
+    end
+  end
 
   defp set_selected_character(client, "noname") do
     %{client | selected_character: :none}
@@ -140,11 +168,10 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
     %{client | characters: characters}
   end
 
-  defp char_overview_msg(%{characters: chars, account: account}) do
+  defp char_overview_msg(%{characters: chars}) do
     alias EOD.Packet.Server.CharacterOverviewResponse, as: Response
 
     %Response{
-      username: account.username,
       characters:
         Enum.map(0..9, fn slot ->
           Enum.find(chars, &(&1.slot == slot)) |> as_resp_char
@@ -152,7 +179,7 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
     }
   end
 
-  defp as_resp_char(nil), do: %EOD.Packet.Server.CharacterOverviewResponse.Character{}
+  defp as_resp_char(nil), do: %EOD.Packet.Server.CharacterOverviewResponse.Empty{}
 
   defp as_resp_char(char) do
     alias EOD.Packet.Server.CharacterOverviewResponse.Character

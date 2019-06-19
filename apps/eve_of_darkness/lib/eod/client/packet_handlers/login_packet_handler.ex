@@ -55,10 +55,7 @@ defmodule EOD.Client.LoginPacketHandler do
 
   defp handshake_response(data) do
     %HandshakeResponse{
-      type: data.type,
-      rev: data.rev,
-      build: data.build,
-      version: "#{data.major}.#{data.minor}#{data.patch}"
+      version: "#{data.major}.#{data.minor}#{data.patch}#{IO.iodata_to_binary([data.rev])}"
     }
   end
 

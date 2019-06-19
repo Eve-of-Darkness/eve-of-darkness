@@ -8,9 +8,15 @@ defmodule EOD.Packet.Server.CharacterOverviewResponse do
     code(0xFD)
 
     structure Character do
-      blank(using: 0x00, size: [bytes: 4])
-      field(:name, :c_string, size: [bytes: 24])
-      field(:custom_mode, :integer, size: [bytes: 1])
+      field(:level, :integer, size: [bytes: 1])
+      field(:name, :pascal_string, size: 4, type: :little, null_terminated: true)
+
+      # Unkown
+      blank(using: 0x18, size: [bytes: 1])
+      blank(using: 0x00, size: [bytes: 3])
+      blank(using: 0x01, size: [bytes: 1])
+
+      # field(:custom_mode, :integer, size: [bytes: 1])
       field(:eye_size, :integer, size: [bytes: 1])
       field(:lip_size, :integer, size: [bytes: 1])
       field(:eye_color, :integer, size: [bytes: 1])
@@ -27,29 +33,13 @@ defmodule EOD.Packet.Server.CharacterOverviewResponse do
       blank(using: 0x02, size: [bytes: 1])
       field(:mood_type, :integer, size: [bytes: 1])
       blank(using: 0x00, size: [bytes: 13])
-      field(:location, :c_string, size: [bytes: 24])
-      field(:class_name, :c_string, size: [bytes: 24])
-      field(:race_name, :c_string, size: [bytes: 24])
-      field(:level, :integer, size: [bytes: 1])
-      field(:class, :integer, size: [bytes: 1])
-      field(:realm, :integer, size: [bytes: 1])
-
-      compound :race_and_gender, :integer, size: [bytes: 1] do
-        field(:race, default: 0)
-        field(:gender, default: 0)
-      end
+      field(:location, :pascal_string, size: 4, type: :little, null_terminated: true)
+      field(:class_name, :pascal_string, size: 4, type: :little, null_terminated: true)
+      field(:race_name, :pascal_string, size: 4, type: :little, null_terminated: true)
 
       field(:model, :little_int, size: [bytes: 2])
       field(:region, :integer, size: [bytes: 1])
-      blank(using: 0x00, size: [bytes: 5])
-      field(:strength, :integer, size: [bytes: 1])
-      field(:dexterity, :integer, size: [bytes: 1])
-      field(:constitution, :integer, size: [bytes: 1])
-      field(:quickness, :integer, size: [bytes: 1])
-      field(:intelligence, :integer, size: [bytes: 1])
-      field(:piety, :integer, size: [bytes: 1])
-      field(:empathy, :integer, size: [bytes: 1])
-      field(:charisma, :integer, size: [bytes: 1])
+      blank(using: 0x00, size: [bytes: 1])
       field(:helmet, :little_int, size: [bytes: 2])
       field(:gloves, :little_int, size: [bytes: 2])
       field(:boots, :little_int, size: [bytes: 2])
@@ -70,6 +60,23 @@ defmodule EOD.Packet.Server.CharacterOverviewResponse do
       field(:left_hand_model, :little_int, size: [bytes: 2])
       field(:two_hand_model, :little_int, size: [bytes: 2])
       field(:ranged_model, :little_int, size: [bytes: 2])
+
+      field(:strength, :integer, size: [bytes: 1])
+      field(:dexterity, :integer, size: [bytes: 1])
+      field(:constitution, :integer, size: [bytes: 1])
+      field(:quickness, :integer, size: [bytes: 1])
+      field(:intelligence, :integer, size: [bytes: 1])
+      field(:piety, :integer, size: [bytes: 1])
+      field(:empathy, :integer, size: [bytes: 1])
+      field(:charisma, :integer, size: [bytes: 1])
+
+      field(:class, :integer, size: [bytes: 1])
+      field(:realm, :integer, size: [bytes: 1])
+
+      compound :race_and_gender, :integer, size: [bytes: 1] do
+        field(:race, default: 0)
+        field(:gender, default: 0)
+      end
 
       # TODO: Selected Weapon
       blank(using: 0xFF, size: [bytes: 1])
@@ -93,8 +100,9 @@ defmodule EOD.Packet.Server.CharacterOverviewResponse do
       end
     end
 
-    field(:username, :c_string, size: [bytes: 24])
-    list(:characters, Character, size: 10)
-    blank(using: 0x00, size: [bytes: 94])
+    structure(Empty, do: blank(using: 0x00, size: [bytes: 1], match_exactly?: true))
+
+    blank(using: 0x00, size: [bytes: 8])
+    list(:characters, [Empty, Character], size: 10)
   end
 end

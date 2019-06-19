@@ -13,12 +13,12 @@ defmodule EOD.Packet.Client.LoginRequestTest do
       %LoginRequest{username: "bigben", password: "roflcopters"}
       |> LoginRequest.to_binary()
 
-    assert bin == <<0::56, 6, 0, "bigben", 11, 0, "roflcopters">>
+    assert bin == <<0::56, 7, 0::24, "bigben", 0, 12, 0::24, "roflcopters", 0>>
   end
 
   test "it can read from a binary" do
     {:ok, req} =
-      <<0::56, 6, 0, "bigben", 11, 0, "roflcopters">>
+      <<0::56, 7, 0::24, "bigben", 0, 12, 0::24, "roflcopters", 0>>
       |> LoginRequest.from_binary()
 
     assert req.username == "bigben"
