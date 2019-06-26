@@ -26,7 +26,7 @@ defmodule EOD.Repo.Account do
 
   def correct_password?(%__MODULE__{password: hash}, password)
       when is_binary(hash) and is_binary(password),
-      do: Comeonin.Pbkdf2.checkpw(password, hash)
+      do: Pbkdf2.verify_pass(password, hash)
 
   def correct_password?(_, _), do: Comeonin.Pbkdf2.dummy_checkpw()
 
@@ -38,7 +38,7 @@ defmodule EOD.Repo.Account do
   end
 
   defp hash_password(%Ecto.Changeset{changes: %{password: password}} = changeset) do
-    put_change(changeset, :password, Comeonin.Pbkdf2.hashpwsalt(password))
+    put_change(changeset, :password, Pbkdf2.hash_pwd_salt(password))
   end
 
   defp hash_password(changeset), do: changeset

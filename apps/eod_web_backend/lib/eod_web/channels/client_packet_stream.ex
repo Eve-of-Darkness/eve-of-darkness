@@ -9,10 +9,11 @@ defmodule EOD.Web.ClientPacketStream do
   require Logger
 
   def join("clients-packets:" <> account_name, _payload, socket) do
-    with {:ok, %{pid: pid}} <- ClientContext.get_client_by_account_name(account_name) do
-      ClientContext.subcribe_to_packet_inspection(pid)
-      {:ok, socket}
-    else
+    case ClientContext.get_client_by_account_name(account_name) do
+      {:ok, %{pid: pid}} ->
+        ClientContext.subcribe_to_packet_inspection(pid)
+        {:ok, socket}
+
       error ->
         Logger.error("Error Joining ClientPacketStream:#{account_name} [#{inspect(error)}]")
         {:error, "#{inspect(error)}"}

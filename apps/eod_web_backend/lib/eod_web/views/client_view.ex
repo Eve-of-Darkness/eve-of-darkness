@@ -35,9 +35,10 @@ defmodule EOD.Web.ClientView do
   end
 
   defp version(%{version: version}) do
-    with %{major: major, minor: minor, patch: patch, rev: rev, build: build} <- version do
-      "#{major}.#{minor}#{patch}#{IO.iodata_to_binary([rev])} #{build}"
-    else
+    case version do
+      %{major: major, minor: minor, patch: patch, rev: rev, build: build} ->
+        "#{major}.#{minor}#{patch}#{IO.iodata_to_binary([rev])} #{build}"
+
       _ ->
         "unkown"
     end

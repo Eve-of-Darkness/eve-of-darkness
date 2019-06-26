@@ -41,15 +41,15 @@ defmodule EOD.Mixfile do
       {:ecto, "~> 3.1.0"},
       {:ecto_sql, "~> 3.1.0"},
       {:postgrex, ">= 0.0.0"},
-      {:comeonin, "~> 4.0"},
-      {:pbkdf2_elixir, "~> 0.12"},
+      {:comeonin, "~> 5.0"},
+      {:pbkdf2_elixir, "~> 1.0"},
 
       # Dev Only Deps
       {:cortex, "~> 0.1", only: [:dev, :test]},
 
       # Test Only Dependencies
       {:ex_machina, "~> 2.2", only: :test},
-      {:credo, "~> 0.8", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.1", only: [:dev, :test], runtime: false}
     ]
   end
 end
