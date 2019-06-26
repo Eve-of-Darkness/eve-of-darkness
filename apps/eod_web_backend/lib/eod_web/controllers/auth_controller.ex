@@ -24,9 +24,10 @@ defmodule EOD.Web.AuthController do
   end
 
   def info(conn, _params) do
-    with %{current_user: user} <- conn.assigns do
-      render(conn, "info.json", user: user)
-    else
+    case conn.assigns do
+      %{current_user: user} ->
+        render(conn, "info.json", user: user)
+
       _ ->
         send_resp(conn, 401, "")
     end

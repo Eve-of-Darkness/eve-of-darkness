@@ -111,10 +111,12 @@ defmodule EOD.Client.SessionManager do
     |> Enum.find(&match?({:account, ^pid, _}, &1))
     |> case do
       nil ->
-        with {:ok, _} <- Registry.register(Client.Registry, {:account, pid, username}, username) do
-          GenServer.call(pid, {:register_account, self(), username})
-        else
-          {:error, {:already_registered, _}} -> {:error, :account_already_registered}
+        case Registry.register(Client.Registry, {:account, pid, username}, username) do
+          {:ok, _} ->
+            GenServer.call(pid, {:register_account, self(), username})
+
+          {:error, {:already_registered, _}} ->
+            {:error, :account_already_registered}
         end
 
       {:account, ^pid, ^username} ->

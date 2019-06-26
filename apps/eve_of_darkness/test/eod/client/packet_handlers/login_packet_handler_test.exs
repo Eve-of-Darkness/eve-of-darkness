@@ -17,7 +17,7 @@ defmodule EOD.Client.LoginPacketHandlerTest do
     acct =
       insert(:account,
         username: "benfalk",
-        password: Comeonin.Pbkdf2.hashpwsalt("roflcopter")
+        password: Pbkdf2.hash_pwd_salt("roflcopter")
       )
 
     {:ok, sm} = SessionManager.start_link()

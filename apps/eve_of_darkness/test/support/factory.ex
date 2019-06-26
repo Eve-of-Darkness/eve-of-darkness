@@ -7,7 +7,7 @@ defmodule EOD.Repo.Factory do
   def account_factory do
     %Account{
       username: sequence(:uname, &"username_#{&1}"),
-      password: Comeonin.Pbkdf2.hashpwsalt("test-password")
+      password: Pbkdf2.hash_pwd_salt("test-password")
     }
   end
 

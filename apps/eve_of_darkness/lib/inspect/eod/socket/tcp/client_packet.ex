@@ -10,21 +10,16 @@ defimpl Inspect, for: EOD.Socket.TCP.ClientPacket do
       session_id: #{packet.session_id}, parameter: #{packet.parameter},
       sequence: #{packet.sequence}, check: #{packet.check},
       data:
-    #{readable_data_binary(packet.data)}
+    #{inspect_data(packet.data)}
     }
     """
   end
 
-  defp readable_data_binary(data) when is_binary(data) do
-    for(<<byte::8 <- data>>, do: byte)
-    |> Enum.chunk_every(12, 12, Stream.repeatedly(fn -> nil end))
-    |> Enum.map(fn byte_list ->
-      "    #{Enum.map(byte_list, &hex/1) |> Enum.join(" ")}  #{Enum.map(byte_list, &ascii/1)}"
-    end)
-    |> Enum.join("\n")
+  defp inspect_data(data) when is_binary(data) do
+    EOD.Binary.readable_data_binary(data, "    ")
   end
 
-  defp readable_data_binary(data) when is_map(data) do
+  defp inspect_data(data) do
     "    #{inspect(data)}"
   end
 
@@ -35,8 +30,4 @@ defimpl Inspect, for: EOD.Socket.TCP.ClientPacket do
   defp hex(num) when is_integer(num), do: Base.encode16(<<num::8>>)
   defp hex(byte) when byte_size(byte) == 1, do: Base.encode16(byte)
   defp hex(nil), do: "  "
-
-  defp ascii(nil), do: ""
-  defp ascii(num) when num in 32..126, do: <<num::8>>
-  defp ascii(_), do: "."
 end
