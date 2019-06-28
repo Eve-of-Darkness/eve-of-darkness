@@ -8,7 +8,7 @@ defmodule EOD.Region.Manager do
   defstruct region_supervisor: nil, region_ids: []
 
   def start_link(opts \\ []) do
-    opts = Keyword.put_new(opts, :regions, all_enabled_regions())
+    opts = Keyword.put_new_lazy(opts, :regions, &all_enabled_regions/0)
     GenServer.start_link(__MODULE__, opts)
   end
 
