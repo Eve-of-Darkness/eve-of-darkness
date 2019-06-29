@@ -6,6 +6,8 @@ defmodule EOD.Region.ManagerTest do
   describe "when started up with no options" do
     setup _ do
       insert(:region_data, region_id: 51, name: "region051", description: "Area 51")
+      # Can't start supervised here because it won't share the same transaction above
+      # and therefore won't find any regions when started without options
       {:ok, pid} = Manager.start_link(ip_address: "192.168.1.111", tcp_port: 10_300)
       {:ok, manager: pid}
     end

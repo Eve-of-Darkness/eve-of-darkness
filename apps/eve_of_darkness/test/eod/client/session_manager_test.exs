@@ -5,9 +5,9 @@ defmodule EOD.Client.SessionManagerTest do
   setup tags do
     {:ok, manager} =
       if tags[:id_pool] do
-        SM.start_link(id_pool: tags[:id_pool])
+        start_supervised({SM, id_pool: tags[:id_pool]})
       else
-        SM.start_link()
+        start_supervised(SM)
       end
 
     {:ok, manager: manager}

@@ -4,7 +4,7 @@ defmodule EOD.ServerTest do
 
   setup _ do
     settings = %Server.Settings{server_name: "roflcopters"}
-    {:ok, server} = Server.start_link(conn_manager: :disabled, settings: settings)
+    {:ok, server} = start_supervised({Server, [conn_manager: :disabled, settings: settings]})
     {:ok, server: server}
   end
 

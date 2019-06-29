@@ -20,7 +20,7 @@ defmodule EOD.Client.LoginPacketHandlerTest do
         password: Pbkdf2.hash_pwd_salt("roflcopter")
       )
 
-    {:ok, sm} = SessionManager.start_link()
+    {:ok, sm} = start_supervised(SessionManager)
 
     {:ok,
      handler: LoginPacketHandler,
