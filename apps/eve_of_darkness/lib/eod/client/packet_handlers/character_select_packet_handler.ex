@@ -122,24 +122,11 @@ defmodule EOD.Client.CharacterSelectPacketHandler do
 
   # Private Methods
 
-  @hibernia 3
-  @midgard 2
-  @albion 1
-  @unknown 0
   defp as_character_params(packet, client) do
     packet
     |> Map.from_struct()
     |> Map.merge(%{account_id: client.account.id})
-    |> case do
-      %{realm: @midgard, slot: slot} = params ->
-        %{params | slot: slot - 10}
-
-      %{realm: @hibernia, slot: slot} = params ->
-        %{params | slot: slot - 20}
-
-      %{realm: realm} = params when realm in [@albion, @unknown] ->
-        params
-    end
+    |> Map.update!(:slot, &rem(&1, 10))
   end
 
   defp set_selected_character(client, "noname") do
