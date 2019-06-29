@@ -91,12 +91,6 @@ defmodule EOD.Server do
     {:reply, state.settings, state}
   end
 
-  # Called when a new client connects from the conn_manager
-  def handle_info({{:new_conn, ref}, socket}, %{ref: ref} = state) do
-    Client.Manager.start_client(state.client_manager, socket)
-    {:noreply, state}
-  end
-
   def handle_info({:boot_conn_manager, ref}, %{ref: ref, conn_manager: nil} = state) do
     {:ok, conn_manager} = ConnManager.start_link(conn_manager_opts(state))
     {:noreply, %{state | conn_manager: conn_manager}}
@@ -121,10 +115,10 @@ defmodule EOD.Server do
     end
   end
 
-  defp conn_manager_opts(%{ref: ref, settings: settings}) do
+  defp conn_manager_opts(%{settings: settings, client_manager: manager}) do
     [
       port: settings.tcp_port,
-      callback: {:send, {:new_conn, ref}, self()},
+      callback: {:call, {Client.Manager, :start_client, [manager, [server: self()]]}},
       wrap: {Socket.TCP.GameSocket, :new, []}
     ]
   end

@@ -11,4 +11,5 @@ defprotocol EOD.Socket do
   def recv(socket)
   def send(socket, data)
   def close(socket)
+  def controlling_process(socket, pid)
 end

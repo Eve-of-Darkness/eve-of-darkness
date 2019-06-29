@@ -72,6 +72,10 @@ defmodule EOD.Socket.TCP.GameSocket do
 
   def close(%{socket: socket}), do: :gen_tcp.close(socket)
 
+  def controlling_process(%{socket: socket}, pid) do
+    :gen_tcp.controlling_process(socket, pid)
+  end
+
   def add_inspector(%{inspector: false} = state, inspector) do
     {:ok, %{state | inspector: inspector}}
   end
@@ -104,4 +108,7 @@ defimpl EOD.Socket, for: EOD.Socket.TCP.GameSocket do
   def send(socket, data), do: EOD.Socket.TCP.GameSocket.send(socket, data)
   def recv(socket), do: EOD.Socket.TCP.GameSocket.recv(socket)
   def close(socket), do: EOD.Socket.TCP.GameSocket.close(socket)
+
+  def controlling_process(socket, pid),
+    do: EOD.Socket.TCP.GameSocket.controlling_process(socket, pid)
 end

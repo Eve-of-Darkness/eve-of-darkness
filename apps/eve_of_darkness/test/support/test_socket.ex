@@ -16,17 +16,21 @@ defmodule EOD.TestSocket do
               waiting_clients: :queue.new(),
               waiting_servers: :queue.new(),
               state: :open,
+              controlling_process: nil,
               ref: nil
+
+    def new, do: %__MODULE__{ref: make_ref(), controlling_process: self()}
   end
 
   @empty :queue.new()
 
   @doc """
   Returns a fresh `TestSocket` that can be used with `EOD.Socket`.  It is
-  started in `server` mode. The return is `{:ok, socket}`
+  started in `server` mode. The return is `{:ok, socket}`.  It is important
+  to point out that the process that starts this is the controlling process.
   """
   def start_link do
-    {:ok, pid} = GenServer.start_link(__MODULE__, %State{ref: make_ref()})
+    {:ok, pid} = GenServer.start_link(__MODULE__, State.new())
     {:ok, %__MODULE__{pid: pid}}
   end
 
@@ -69,6 +73,18 @@ defmodule EOD.TestSocket do
   end
 
   @doc """
+  This simulates changing controll of a process similar to the interface for
+  :gen_tcp. Returns `:ok` on success or `{:error, reason}` on failure
+  """
+  def controlling_process(%__MODULE__{pid: pid}, new_pid) do
+    if Process.alive?(pid) do
+      GenServer.call(pid, {:controlling_process, %{new: new_pid, current: self()}})
+    else
+      {:error, :closed}
+    end
+  end
+
+  @doc """
   Returns an updated socket with the role set, may be either `:server` or `:client`
   """
   def set_role(socket = %__MODULE__{} = socket, role) when role in [:server, :client] do
@@ -99,6 +115,14 @@ defmodule EOD.TestSocket do
 
   def handle_call(:disconnected?, _, state) do
     {:reply, state.state == :closed, state}
+  end
+
+  def handle_call({:controlling_process, %{new: new, current: curr}}, _, state) do
+    if curr != state.controlling_process do
+      {:reply, {:error, :not_owner}, state}
+    else
+      {:reply, :ok, %{state | controlling_process: new}}
+    end
   end
 
   def handle_call(:close, _, state) do
@@ -182,4 +206,5 @@ defimpl EOD.Socket, for: EOD.TestSocket do
   def send(socket, msg), do: EOD.TestSocket.send(socket, msg)
   def recv(socket), do: EOD.TestSocket.recv(socket)
   def close(socket), do: EOD.TestSocket.close(socket)
+  def controlling_process(socket, pid), do: EOD.TestSocket.controlling_process(socket, pid)
 end

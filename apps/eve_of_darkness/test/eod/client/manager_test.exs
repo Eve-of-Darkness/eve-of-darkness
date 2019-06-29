@@ -13,7 +13,7 @@ defmodule EOD.Client.ManagerTest do
   end
 
   test "can start a client with just a socket", context do
-    assert :ok == Manager.start_client(context.manager, context.socket)
+    assert :ok == Manager.start_client(context.socket, context.manager)
     assert 1 == Manager.client_count(context.manager)
   end
 end
