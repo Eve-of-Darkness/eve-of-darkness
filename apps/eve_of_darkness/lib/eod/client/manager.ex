@@ -10,7 +10,7 @@ defmodule EOD.Client.Manager do
   defstruct clients: nil,
             sessions: nil
 
-  def start_link do
+  def start_link(_opts \\ []) do
     GenServer.start_link(__MODULE__, nil)
   end
 

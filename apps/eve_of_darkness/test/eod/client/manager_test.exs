@@ -3,7 +3,7 @@ defmodule EOD.Client.ManagerTest do
   alias EOD.Client.Manager
 
   setup _ do
-    {:ok, manager} = Manager.start_link()
+    {:ok, manager} = start_supervised(Manager)
     {:ok, socket} = EOD.TestSocket.start_link()
     {:ok, manager: manager, socket: socket}
   end

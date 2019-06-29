@@ -11,8 +11,8 @@ defmodule EOD.ClientTest do
 
   setup tags do
     {:ok, socket} = TestSocket.start_link()
-    {:ok, sessions} = SessionManager.start_link(id_pool: tags[:id_pool] || [1, 2, 3])
-    {:ok, client} = Client.start_link(%Client{tcp_socket: socket, sessions: sessions})
+    {:ok, sessions} = start_supervised({SessionManager, id_pool: tags[:id_pool] || [1, 2, 3]})
+    {:ok, client} = start_supervised({Client, %Client{tcp_socket: socket, sessions: sessions}})
     Client.share_test_transaction(client)
     {:ok, client: client, socket: TestSocket.set_role(socket, :client)}
   end
