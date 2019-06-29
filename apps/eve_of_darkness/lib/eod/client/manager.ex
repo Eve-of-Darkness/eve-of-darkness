@@ -18,9 +18,10 @@ defmodule EOD.Client.Manager do
   Starts a client with a socket and optionaly specified server.  If the server
   is not given as an option it defaults to the calling process as the server.
   """
-  def start_client(manager, tcp_socket, opts \\ []) do
+  def start_client(socket, manager, opts \\ []) do
     server = Keyword.get(opts, :server, self())
-    GenServer.cast(manager, {:start_client, tcp_socket, server})
+    client = GenServer.call(manager, {:start_client, socket, server})
+    :ok = EOD.Socket.controlling_process(socket, client)
   end
 
   @doc """
@@ -53,14 +54,14 @@ defmodule EOD.Client.Manager do
     {:reply, count, state}
   end
 
-  def handle_cast({:start_client, socket, server}, state) do
-    {:ok, _client} =
+  def handle_call({:start_client, socket, server}, _, state) do
+    {:ok, client} =
       Supervisor.start_child(
         state.clients,
         [%Client{tcp_socket: socket, sessions: state.sessions, server: server}]
       )
 
-    {:noreply, state}
+    {:reply, client, state}
   end
 
   # Private Functions

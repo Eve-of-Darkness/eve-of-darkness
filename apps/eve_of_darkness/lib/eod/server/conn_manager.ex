@@ -26,9 +26,16 @@ defmodule EOD.Server.ConnManager do
     * :wrap - a three element tuple with format of {Module, :fun, [args]}, if
         provided each new socket will dynamically call this and append the
         socket as the first argument to the function
-    * :callback - a three element tuple with format of {:send, any(), pid()}
-        when a new connection is accepted it is sent as a two element
-        tuple of {any(), client}
+    * :callback - can be one of either:
+        * a three element tuple with format of {:send, any(), pid()}
+          when a new connection is accepted it is sent as a two element
+          tuple of {any(), client} to the supplied pid or registered process.
+          In this case process being sent to is already set as the controlling
+          process.
+        * a two pair tuple of {:call, {module, fun, args}}.  In this case the
+          the module fun is dynamically called with the socket being appened
+          to the list of arguments.  In this instance make sure the function
+          takes controll of the socket as it can't be done for you.
   """
   def start_link(opts \\ []) do
     with {:ok, port} <- opts |> Keyword.get(:port, 10_300) |> parse_port,
@@ -77,6 +84,7 @@ defmodule EOD.Server.ConnManager do
   defp def_clbk, do: {:send, :new_conn, self()}
 
   defp check_callback({:send, _, pid} = clbk) when is_pid(pid), do: {:ok, clbk}
+  defp check_callback({:call, {_, _, args}} = clbk) when is_list(args), do: {:ok, clbk}
 
   defp check_wrap(:none), do: {:ok, :none}
 
@@ -102,7 +110,12 @@ defmodule EOD.Server.ConnManager do
       end
 
     case state.callback do
-      {:send, term, pid} -> send(pid, {term, wrapped_socket})
+      {:send, term, pid} ->
+        :gen_tcp.controlling_process(client_socket, pid)
+        send(pid, {term, wrapped_socket})
+
+      {:call, {m, f, a}} ->
+        apply(m, f, [wrapped_socket | a])
     end
 
     accept(state)
