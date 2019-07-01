@@ -1,108 +1,91 @@
 defmodule EOD.Server do
   @moduledoc """
-  Responsible for orchestrating the back & forth talk
-  between clients and delegating to the different
-  logic centers of the game
+  Responsible for starting up and supervisoring all the important workers and
+  supervisors needed to orchestrate a running server.  All of the major parts
+  are registered and "namespace" to the started supervisor by it's name or pid
   """
-  use GenServer
-  alias EOD.Server.{ConnManager, Settings}
+  use Supervisor
   alias EOD.{Client, Socket, Region}
-  require Logger
+  alias EOD.Server.{ConnManager, Settings}
 
-  defstruct conn_manager: nil,
-            client_manager: nil,
-            region_manager: nil,
-            settings: nil,
-            ref: nil
+  @registry EOD.Server.Registry
 
   @doc """
   Starts a EOD Server.  There are some options; some of which are meant more
   so for testing then anything else.
 
   Options:
-    * `ref`
-      By default the server creates an internal reference which it
-      uses to match on messages sent directly to it by trusted processes.
-      If you want to be able to send messages directly to the server
-      process for these conditions you'll need to specify this.
-
     * `conn_manager`
       If this is left out the server will boot up it's default connection
-      manager; however, if this option is provided it will be used and
-      the default manager will not be booted.
+      manager; however, if this option is set to `:disabled` a connection
+      manager will not be booted
 
     * `settings`
       This should be an `EOD.Server.Settings` struct.  If left absent
       it will default to `EOD.Server.Settings.new/0`
 
     * `name`
-      This is the alias pid to which the server is alias; if provided;
+      This is the alias to which the server is registered if provided;
       otherwise it defaults to `EOD.Server`.  You can also specify a
       special option of `:none` which opts out of registering the pid
-      under a name
+      under a name.
   """
-  def start_link(opts \\ []) do
-    ref = opts[:ref] || make_ref()
-    conn_manager = opts[:conn_manager]
+  def start_link(opts) do
+    Supervisor.start_link(__MODULE__, opts, supervisor_opts(opts))
+  end
 
+  @doc """
+  Returns the name of the `EOD.Client.Manager` process being supervised by the server
+  """
+  def client_manager(server), do: {:via, Registry, {@registry, {server, :client_mgr}}}
+
+  @doc """
+  Returns the name of the `EOD.Region.Manager` process being supervised by the server
+  """
+  def region_manager(server), do: {:via, Registry, {@registry, {server, :region_mgr}}}
+
+  @doc """
+  Returns the `EOD.Server.Settings` struct that was used to start the server
+  """
+  def settings(server), do: server |> settings_agent() |> Agent.get(& &1)
+
+  ## Supervisor Callback
+
+  @impl true
+  def init(opts) do
     settings = Keyword.get_lazy(opts, :settings, fn -> Settings.new() end)
+    server = server_name(opts)
 
-    GenServer.start_link(
-      __MODULE__,
-      %__MODULE__{ref: ref, settings: settings, conn_manager: conn_manager},
-      genserver_opts(opts)
+    Supervisor.init(
+      [
+        settings_spec(server, settings),
+        {Client.Manager, name: client_manager(server)},
+        {Region.Manager, region_manager_opts(server, settings)}
+      ] ++ potential_conn_manager(opts, server, settings),
+      strategy: :rest_for_one
     )
   end
 
-  @doc """
-  Returns the `EOD.Region.Manager` process being managed by the server
-  """
-  def region_manager(pid), do: GenServer.call(pid, :get_region_manager)
+  ## Private Functions
 
-  @doc """
-  Returns the `EOD.Client.Manager` process bieng managed by the server
-  """
-  def client_manager(pid), do: GenServer.call(pid, :get_client_manager)
+  defp settings_spec(server, settings) do
+    %{
+      id: Agent,
+      start: {Agent, :start_link, [fn -> settings end, [name: settings_agent(server)]]}
+    }
+  end
 
-  @doc """
-  Returns the `EOD.Server.Settings` struct for a given server process
-  """
-  def settings(pid), do: GenServer.call(pid, :get_settings)
+  defp settings_agent(server), do: {:via, Registry, {@registry, {server, :settings}}}
 
-  # GenServer Callbacks
-
-  def init(%__MODULE__{} = state) do
-    with {:ok, client_manager} <- Client.Manager.start_link(),
-         {:ok, region_manager} <- boot_region_manager(state) do
-      send(self(), {:boot_conn_manager, state.ref})
-      {:ok, %{state | client_manager: client_manager, region_manager: region_manager}}
+  defp server_name(opts) do
+    case opts[:name] do
+      nil -> EOD.Server
+      :none -> self()
+      any -> any
     end
   end
 
-  def handle_call(:get_region_manager, _, state) do
-    {:reply, state.region_manager, state}
-  end
-
-  def handle_call(:get_client_manager, _, state) do
-    {:reply, state.client_manager, state}
-  end
-
-  def handle_call(:get_settings, _, state) do
-    {:reply, state.settings, state}
-  end
-
-  def handle_info({:boot_conn_manager, ref}, %{ref: ref, conn_manager: nil} = state) do
-    {:ok, conn_manager} = ConnManager.start_link(conn_manager_opts(state))
-    {:noreply, %{state | conn_manager: conn_manager}}
-  end
-
-  def handle_info({:boot_conn_manager, ref}, %{ref: ref} = state) do
-    {:noreply, state}
-  end
-
-  # Private Functions
-
-  defp genserver_opts(opts) do
+  defp supervisor_opts(opts) do
     case opts[:name] do
       nil ->
         [name: EOD.Server]
@@ -115,21 +98,28 @@ defmodule EOD.Server do
     end
   end
 
-  defp conn_manager_opts(%{settings: settings, client_manager: manager}) do
+  defp potential_conn_manager(opts, server, settings) do
+    if opts[:conn_manager] == :disabled do
+      []
+    else
+      {ConnManager, conn_manager_opts(server, settings)}
+    end
+  end
+
+  defp conn_manager_opts(server, settings) do
     [
       port: settings.tcp_port,
-      callback: {:call, {Client.Manager, :start_client, [manager, [server: self()]]}},
+      callback:
+        {:call, {Client.Manager, :start_client, [client_manager(server), [server: server]]}},
       wrap: {Socket.TCP.GameSocket, :new, []}
     ]
   end
 
-  defp boot_region_manager(%{settings: settings}) do
-    opts =
-      []
-      |> Keyword.put(:ip_address, settings.tcp_address)
-      |> Keyword.put(:tcp_port, settings.tcp_port)
-      |> Keyword.put(:regions, settings.regions)
-
-    Region.Manager.start_link(opts)
+  defp region_manager_opts(server, settings) do
+    []
+    |> Keyword.put(:ip_address, settings.tcp_address)
+    |> Keyword.put(:tcp_port, settings.tcp_port)
+    |> Keyword.put(:regions, settings.regions)
+    |> Keyword.put(:name, region_manager(server))
   end
 end

@@ -43,7 +43,8 @@ defmodule EOD.Client.ConnectivityPacketHandlerTest do
         regions: [region]
       }
 
-      {:ok, server} = start_supervised({Server, conn_manager: :disabled, settings: settings})
+      {:ok, server} =
+        start_supervised({Server, conn_manager: :disabled, settings: settings, name: :none})
 
       {:ok, client: %{context.client | selected_character: char, server: server}, server: server}
     end
