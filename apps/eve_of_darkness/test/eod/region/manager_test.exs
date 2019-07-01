@@ -3,7 +3,7 @@ defmodule EOD.Region.ManagerTest do
   alias EOD.Region
   alias Region.Manager
 
-  describe "when started up with no options" do
+  describe "when started up with minimal options" do
     setup _ do
       insert(:region_data, region_id: 51, name: "region051", description: "Area 51")
       # Can't start supervised here because it won't share the same transaction above
@@ -31,6 +31,29 @@ defmodule EOD.Region.ManagerTest do
       assert overview = Region.get_overview(pid)
       assert overview.ip_address == "192.168.1.111"
       assert overview.tcp_port == 10_300
+    end
+  end
+
+  describe "starting with all options" do
+    @name {:via, Registry, {EOD.Server.Registry, :region_manager}}
+
+    setup _ do
+      insert(:region_data, region_id: 51, name: "region051", description: "Area 51")
+      another = build(:region_data, region_id: 420, name: "region420", description: "Baked")
+
+      opts = [
+        ip_address: "192.168.1.123",
+        tcp_port: 10_300,
+        regions: [another],
+        name: @name
+      ]
+
+      {:ok, _} = Manager.start_link(opts)
+      :ok
+    end
+
+    test "it only has the regions loaded passed to it and can be referenced by name" do
+      assert [420] = Manager.region_ids(@name)
     end
   end
 end

@@ -2,31 +2,19 @@ defmodule EOD do
   @moduledoc false
   use Application
 
-  # See http://elixir-lang.org/docs/stable/elixir/Application.html
-  # for more information on OTP Applications
+  @base_services [
+    EOD.Repo,
+    {Registry, keys: :unique, name: EOD.Server.Registry},
+    {Registry, keys: :unique, name: EOD.Client.Registry},
+    {Registry, keys: :unique, name: EOD.Region.Registry}
+  ]
+
   def start(_type, _args) do
-    import Supervisor.Spec, warn: false
-
-    # Define workers and child supervisors to be supervised
-    children =
-      if Mix.env() == :test do
-        [
-          supervisor(EOD.Repo, []),
-          {Registry, keys: :unique, name: EOD.Client.Registry},
-          {Registry, keys: :unique, name: EOD.Region.Registry}
-        ]
-      else
-        [
-          supervisor(EOD.Repo, []),
-          worker(EOD.Server, []),
-          {Registry, keys: :unique, name: EOD.Client.Registry},
-          {Registry, keys: :unique, name: EOD.Region.Registry}
-        ]
-      end
-
-    # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
-    # for other strategies and supported options
-    opts = [strategy: :one_for_one, name: EOD.Supervisor]
+    opts = [strategy: :rest_for_one, name: EOD.Supervisor]
+    children = services(Mix.env())
     Supervisor.start_link(children, opts)
   end
+
+  defp services(:test), do: @base_services
+  defp services(_), do: @base_services ++ [EOD.Server]
 end
