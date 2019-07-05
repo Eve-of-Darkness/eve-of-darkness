@@ -102,7 +102,7 @@ defmodule EOD.Server do
     if opts[:conn_manager] == :disabled do
       []
     else
-      {ConnManager, conn_manager_opts(server, settings)}
+      [{ConnManager, conn_manager_opts(server, settings)}]
     end
   end
 

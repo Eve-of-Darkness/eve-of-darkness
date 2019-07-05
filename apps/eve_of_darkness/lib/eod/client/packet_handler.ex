@@ -7,11 +7,15 @@ defmodule EOD.Client.PacketHandler do
   """
 
   alias EOD.{Client, Socket}
+  @callback handle_packet(Client.t(), map()) :: Client.t()
+  @callback __handles__() :: [atom()]
 
   @valid_realms ~w(albion hibernia midgard none)a
 
   defmacro __using__(_) do
     quote do
+      @behaviour EOD.Client.PacketHandler
+
       import EOD.Client.PacketHandler,
         only: [
           send_tcp: 2,
@@ -25,6 +29,7 @@ defmodule EOD.Client.PacketHandler do
           with_player: 2
         ]
 
+      @impl EOD.Client.PacketHandler
       def handle_packet(client, %{id: packet_id, data: data} = packet) do
         apply(__MODULE__, packet_id, [client, data])
       end
@@ -45,7 +50,9 @@ defmodule EOD.Client.PacketHandler do
     ids = Enum.map(packets, &apply(&1, :packet_id, []))
 
     quote do
-      defmacro handles, do: unquote(ids)
+      @doc false
+      @impl EOD.Client.PacketHandler
+      def __handles__, do: unquote(ids)
     end
   end
 
