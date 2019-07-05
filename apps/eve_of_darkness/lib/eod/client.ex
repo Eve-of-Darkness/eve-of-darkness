@@ -9,6 +9,8 @@ defmodule EOD.Client do
   alias EOD.Socket.TCP
   require Logger
 
+  @type t() :: %Client{}
+
   defstruct tcp_socket: nil,
             tcp_listener: nil,
             version: %{},
@@ -108,30 +110,7 @@ defmodule EOD.Client do
   end
 
   def handle_info({{:game_packet, ref}, packet}, %{ref: ref} = state) do
-    require Client.LoginPacketHandler
-    require Client.CharacterSelectPacketHandler
-    require Client.ConnectivityPacketHandler
-    require Client.LoadPlayerPacketHandler
-
-    updated =
-      case packet.id do
-        id when id in Client.LoginPacketHandler.handles() ->
-          Client.LoginPacketHandler.handle_packet(state, packet)
-
-        id when id in Client.ConnectivityPacketHandler.handles() ->
-          Client.ConnectivityPacketHandler.handle_packet(state, packet)
-
-        id when id in Client.CharacterSelectPacketHandler.handles() ->
-          Client.CharacterSelectPacketHandler.handle_packet(state, packet)
-
-        id when id in Client.LoadPlayerPacketHandler.handles() ->
-          Client.LoadPlayerPacketHandler.handle_packet(state, packet)
-
-        _ ->
-          state
-      end
-
-    {:noreply, updated}
+    {:noreply, Client.Router.route(state, packet)}
   end
 
   def handle_info({{:game_packet, ref}, :error, reason}, %{ref: ref} = state) do
