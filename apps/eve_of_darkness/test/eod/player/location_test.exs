@@ -23,11 +23,11 @@ defmodule EOD.Player.LocationTest do
 
   describe "init/1" do
     test "it adds a %LocationInformation{} to player data", context do
-      assert %LocInfo{} = context.state.data[:loc_info]
+      assert %LocInfo{} = context.state
     end
 
     test "it's location information comes from character data", context do
-      loc_info = context.state.data[:loc_info]
+      loc_info = context.state
 
       assert loc_info.x_loc == 38_123.0
       assert loc_info.y_loc == 44_000.0

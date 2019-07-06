@@ -15,6 +15,8 @@ defmodule EOD.Player.LivingStats do
   of this is to have a constant, ready to send representation of the packet to
   send out while keeping track of these metrics.
   """
+  use EOD.Player.Data, key: :living_stats
+
   alias EOD.Player
 
   @living_stats %{
@@ -32,7 +34,7 @@ defmodule EOD.Player.LivingStats do
   This inits a players character with a cache of living stats that can be later
   sent to the client or changed.  Returns `{:ok, player}` with the new data.
   """
-  def init(%Player{character: char} = player) do
+  def init(%Player{character: char}) do
     living_stats = %EOD.Packet.Server.CharacterStatusUpdate{
       hp_percent: as_percent(char.max_hp, char.current_hp),
       mana_percent: as_percent(char.max_mana, char.current_mana),
@@ -49,7 +51,7 @@ defmodule EOD.Player.LivingStats do
       is_sitting?: char.is_sitting?
     }
 
-    {:ok, put_in(player.data[:living_stats], living_stats)}
+    {:ok, living_stats}
   end
 
   @doc """

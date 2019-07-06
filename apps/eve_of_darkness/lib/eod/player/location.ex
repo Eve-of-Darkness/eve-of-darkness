@@ -4,6 +4,8 @@ defmodule EOD.Player.Location do
   notifying other systems of changes that happen.
   """
 
+  use EOD.Player.Data, key: :location
+
   alias EOD.Player
   alias EOD.Packet.Server.SelfLocationInformation, as: SelfLocInfo
   alias __MODULE__, as: Location
@@ -14,7 +16,7 @@ defmodule EOD.Player.Location do
             heading: 0,
             region: 0
 
-  def init(%Player{character: char} = player) do
+  def init(%Player{character: char}) do
     loc_info = %Location{
       x_loc: char.x_loc,
       y_loc: char.y_loc,
@@ -23,11 +25,11 @@ defmodule EOD.Player.Location do
       heading: char.heading
     }
 
-    {:ok, put_in(player.data[:loc_info], loc_info)}
+    {:ok, loc_info}
   end
 
   def send_self_location(%Player{} = player) do
-    loc_info = player.data.loc_info
+    loc_info = player.data.location
 
     EOD.Client.send_message(player.client, %SelfLocInfo{
       x_loc: loc_info.x_loc,
