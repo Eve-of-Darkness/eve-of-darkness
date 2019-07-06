@@ -4,11 +4,12 @@ defmodule EOD.Player.Speed do
   that information to the client.
   """
 
+  use EOD.Player.Data, key: :speed
   alias EOD.Player
   alias EOD.Packet.Server.PlayerSpeed
 
-  def init(%Player{} = player) do
-    {:ok, put_in(player.data[:speed], %PlayerSpeed{max: 125})}
+  def init(%Player{}) do
+    {:ok, %PlayerSpeed{max: 125}}
   end
 
   def send(%Player{data: data, client: client} = player) do

@@ -15,7 +15,7 @@ defmodule EOD.Client.LoadPlayerPacketHandlerTest do
   alias EOD.Player
 
   setup context do
-    selected_char = context[:selected_char] || build(:character)
+    selected_char = context[:selected_char] || insert(:character)
 
     {:ok,
      handler: LoadPlayerPacketHandler,

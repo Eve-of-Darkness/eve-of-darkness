@@ -10,7 +10,9 @@ defmodule EOD.Player do
   alias EOD.Repo.Character
   alias EOD.Client
   alias __MODULE__, as: Player
-  alias Player.{LivingStats, Location, Encumberance, Speed}
+  alias EOD.Player.Data.Structure
+
+  @type t() :: %Player{}
 
   defstruct character: %Character{},
             data: %{},
@@ -34,11 +36,7 @@ defmodule EOD.Player do
   # GenServer Callbacks
 
   def init(state) do
-    {:ok, state} = LivingStats.init(state)
-    {:ok, state} = Location.init(state)
-    {:ok, state} = Encumberance.init(state)
-    {:ok, state} = Speed.init(state)
-    {:ok, state}
+    {:ok, %{state | data: Structure.new(state)}}
   end
 
   def handle_cast({:cast_with, module, fun, args}, state) do
