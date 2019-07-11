@@ -56,9 +56,9 @@ defmodule EOD.Client.Manager do
 
   def handle_call({:start_client, socket, server}, _, state) do
     {:ok, client} =
-      Supervisor.start_child(
+      DynamicSupervisor.start_child(
         state.clients,
-        [%Client{tcp_socket: socket, sessions: state.sessions, server: server}]
+        client_spec(socket, state.sessions, server)
       )
 
     {:reply, client, state}
@@ -66,15 +66,17 @@ defmodule EOD.Client.Manager do
 
   # Private Functions
 
-  defp client_supervisor do
+  defp client_spec(socket, sessions, server) do
     alias EOD.Client
 
-    spec =
-      Supervisor.child_spec(Client,
-        start: {Client, :start_link, []},
-        restart: :transient
-      )
+    %{
+      id: Client,
+      start:
+        {Client, :start_link, [%Client{tcp_socket: socket, sessions: sessions, server: server}]}
+    }
+  end
 
-    Supervisor.start_link([spec], strategy: :simple_one_for_one)
+  defp client_supervisor do
+    DynamicSupervisor.start_link(strategy: :one_for_one)
   end
 end

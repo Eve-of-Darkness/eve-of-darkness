@@ -4,6 +4,7 @@ defmodule EOD.Region.Manager do
   messages to actors in it.
   """
   use GenServer
+  alias EOD.Region
 
   defstruct region_supervisor: nil, region_ids: []
 
@@ -34,9 +35,9 @@ defmodule EOD.Region.Manager do
 
     region_ids =
       for region_data <- opts[:regions] do
-        Supervisor.start_child(
+        DynamicSupervisor.start_child(
           supervisor,
-          [region_data, [name: tuple_name(region_data)] ++ region_opts]
+          region_spec(region_data, region_opts)
         )
 
         region_data.region_id
@@ -65,13 +66,12 @@ defmodule EOD.Region.Manager do
     EOD.Repo.RegionData.enabled() |> EOD.Repo.all()
   end
 
-  defp start_region_supervisor() do
-    spec =
-      Supervisor.child_spec(EOD.Region,
-        start: {EOD.Region, :start_link, []}
-      )
+  def region_spec(data, opts) do
+    %{id: Region, start: {Region, :start_link, [data, [name: tuple_name(data)] ++ opts]}}
+  end
 
-    Supervisor.start_link([spec], strategy: :simple_one_for_one)
+  defp start_region_supervisor() do
+    DynamicSupervisor.start_link(strategy: :one_for_one)
   end
 
   defp tuple_name(%{region_id: id}) do
