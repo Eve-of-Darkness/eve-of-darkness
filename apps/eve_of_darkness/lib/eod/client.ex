@@ -55,6 +55,16 @@ defmodule EOD.Client do
   end
 
   @doc """
+  When a client is started it may need to wait for other orchestration to happen
+  before it can begin processing packets; such as needing it's socket ownership
+  passed to it.  Until this is called the client will not process packets from
+  it's given socket
+  """
+  def begin_processing_packets(pid) do
+    GenServer.cast(pid, :begin_processing_packets)
+  end
+
+  @doc """
   This adds a subscription to the tcp socket of the client.
 
   See: EOD.Socket.Inspector
@@ -71,8 +81,11 @@ defmodule EOD.Client do
      state
      |> Map.put(:client, self())
      |> Map.put(:ref, make_ref())
-     |> Map.put(:started_at, DateTime.utc_now())
-     |> begin_listener}
+     |> Map.put(:started_at, DateTime.utc_now())}
+  end
+
+  def handle_cast(:begin_processing_packets, state) do
+    {:noreply, begin_listener(state)}
   end
 
   def handle_cast({:send_message, message}, state) do
