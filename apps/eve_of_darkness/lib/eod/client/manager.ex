@@ -22,6 +22,7 @@ defmodule EOD.Client.Manager do
     server = Keyword.get(opts, :server, self())
     client = GenServer.call(manager, {:start_client, socket, server})
     :ok = EOD.Socket.controlling_process(socket, client)
+    :ok = Client.begin_processing_packets(client)
   end
 
   @doc """

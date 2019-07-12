@@ -14,6 +14,8 @@ defmodule EOD.ClientTest do
     {:ok, sessions} = start_supervised({SessionManager, id_pool: tags[:id_pool] || [1, 2, 3]})
     {:ok, client} = start_supervised({Client, %Client{tcp_socket: socket, sessions: sessions}})
     Client.share_test_transaction(client)
+    :ok = EOD.Socket.controlling_process(socket, client)
+    :ok = Client.begin_processing_packets(client)
     {:ok, client: client, socket: TestSocket.set_role(socket, :client)}
   end
 
