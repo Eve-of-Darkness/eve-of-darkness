@@ -1,4 +1,8 @@
 language: elixir
+services:
+  - postgresql
+addons:
+  postgresql: "10"
 elixir:
   - '1.8.0'
 otp_release:
