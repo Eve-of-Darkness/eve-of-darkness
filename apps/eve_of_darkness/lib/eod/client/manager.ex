@@ -72,6 +72,7 @@ defmodule EOD.Client.Manager do
 
     %{
       id: Client,
+      restart: :temporary,
       start:
         {Client, :start_link, [%Client{tcp_socket: socket, sessions: sessions, server: server}]}
     }
