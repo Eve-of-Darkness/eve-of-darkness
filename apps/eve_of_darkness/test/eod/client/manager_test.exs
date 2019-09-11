@@ -18,9 +18,26 @@ defmodule EOD.Client.ManagerTest do
     assert 1 == Manager.client_count(context.manager)
   end
 
+  test "if a client dies the count is still correct", context do
+    assert :ok == Manager.start_client(context.socket, context.manager)
+    assert 1 == Manager.client_count(context.manager)
+    client = get_first_found_client_pid(context)
+    GenServer.stop(client)
+    assert 0 == Manager.client_count(context.manager)
+  end
+
   @name {:via, Registry, {EOD.Server.Registry, :rofl_client}}
   @tag opts: [name: @name]
   test "can be given a via tuple name for startup", context do
     assert :ok == Manager.start_client(context.socket, @name)
+  end
+
+  defp get_first_found_client_pid(%{manager: manager}) do
+    manager
+    |> :sys.get_state()
+    |> Map.get(:clients)
+    |> Supervisor.which_children()
+    |> hd()
+    |> elem(1)
   end
 end
